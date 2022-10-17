@@ -16,7 +16,7 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("LOWER(\"siMoN\")", "simon")]
         [TestCase("LOWER(\"ROBERT\")", "robert")]
         [TestCase("LOWER(\"xYz1\")", "xyz1")]
-        public void LowerFormula_SuccessTests(string input, string output)
+        public void LowerFormula_SuccessTest(string input, string output)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.That(result.Value, Is.EqualTo(output));
@@ -26,7 +26,7 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("LOWER(1,\"SD SD\")")]
         [TestCase("LOWER()")]
         [TestCase("LOWER\"SD SD\"")]
-        public void LowerFormula_FailureTests(string input)
+        public void LowerFormula_FailureTest(string input)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.IsNotNull(result.Error);

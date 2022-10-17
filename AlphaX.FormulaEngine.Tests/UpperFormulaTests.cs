@@ -16,7 +16,7 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("UPPER(\"siMoN\")", "SIMON")]
         [TestCase("UPPER(\"ROBERT\")", "ROBERT")]
         [TestCase("UPPER(\"xYz1\")", "XYZ1")]
-        public void UpperFormula_SuccessTests(string input, string output)
+        public void UpperFormula_SuccessTest(string input, string output)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.That(result.Value, Is.EqualTo(output));
@@ -26,7 +26,7 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("UPPER(1,\"SD SD\")")]
         [TestCase("UPPER()")]
         [TestCase("UPPER\"SD SD\"")]
-        public void UpperFormula_FailureTests(string input)
+        public void UpperFormula_FailureTest(string input)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.IsNotNull(result.Error);

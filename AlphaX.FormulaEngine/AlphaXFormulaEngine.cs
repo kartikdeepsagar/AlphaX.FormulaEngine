@@ -10,8 +10,12 @@ namespace AlphaX.FormulaEngine
     {
         private Dictionary<string, Formula> _formulas;
 
+        public FormulaEngineSettings Settings { get; }
+
         public AlphaXFormulaEngine()
         {
+            Settings = FormulaEngineSettings.Default;
+            Settings.Update();
             _formulas = new Dictionary<string, Formula>();
             AddFormula(new SumFormula());
             AddFormula(new AverageFormula());
@@ -24,7 +28,7 @@ namespace AlphaX.FormulaEngine
         {
             try
             {
-                var parserState = ParserProvider.FormulaParser.Run(input);
+                var parserState = ParserFactory.FormulaParser.Run(input);
 
                 if (parserState.IsError)
                     return new EvaluationResult(parserState.Error.Message);

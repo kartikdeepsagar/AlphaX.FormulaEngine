@@ -17,7 +17,7 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("SUM(-1 ,  12,  3,1)", 15)]
         [TestCase("SUM(1.1,2.1, 3, 4.2)", 10.4)]
         [TestCase("SUM(1, SUM(1,2,SUM(2,2)), 4)", 12)]
-        public void SumFormula_SuccessTests(string input, double output)
+        public void SumFormula_SuccessTest(string input, double output)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.That(result.Value, Is.EqualTo(output));
@@ -27,7 +27,7 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("SUM(0- ,  12,  3,1)")]
         [TestCase("SUM,  12,  3,1)")]
         [TestCase("SUM(..1,2.1, 3, 4.2)")]
-        public void SumFormula_FailureTests(string input)
+        public void SumFormula_FailureTest(string input)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.IsNotNull(result.Error);

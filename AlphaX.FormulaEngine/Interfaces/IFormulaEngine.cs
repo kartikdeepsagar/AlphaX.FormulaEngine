@@ -1,9 +1,11 @@
-﻿using AlphaX.FormulaEngine.Formulas;
-
-namespace AlphaX.FormulaEngine
+﻿namespace AlphaX.FormulaEngine
 {
     public interface IFormulaEngine
     {
+        /// <summary>
+        /// Gets the engine settings.
+        /// </summary>
+        FormulaEngineSettings Settings { get; }
         /// <summary>
         /// Gets the evaluated result of the provided formula expression.
         /// </summary>
