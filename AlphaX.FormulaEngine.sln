@@ -5,7 +5,9 @@ VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaX.FormulaEngine", "AlphaX.FormulaEngine\AlphaX.FormulaEngine.csproj", "{A68E2723-6EAE-49F2-9093-533904BF774B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaX.FormulaEngine.Tests", "AlphaX.FormulaEngine.Tests\AlphaX.FormulaEngine.Tests.csproj", "{5D9999DA-D570-4926-901A-0F2A70E6387B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AlphaX.FormulaEngine.Tests", "AlphaX.FormulaEngine.Tests\AlphaX.FormulaEngine.Tests.csproj", "{5D9999DA-D570-4926-901A-0F2A70E6387B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaX.FormulaEngine.Benchmark", "AlphaX.FormulaEngine.Benchmark\AlphaX.FormulaEngine.Benchmark.csproj", "{80F8C654-7B24-4129-A3D6-118237C4DAF4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{5D9999DA-D570-4926-901A-0F2A70E6387B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5D9999DA-D570-4926-901A-0F2A70E6387B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5D9999DA-D570-4926-901A-0F2A70E6387B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80F8C654-7B24-4129-A3D6-118237C4DAF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80F8C654-7B24-4129-A3D6-118237C4DAF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80F8C654-7B24-4129-A3D6-118237C4DAF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80F8C654-7B24-4129-A3D6-118237C4DAF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
