@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>Icon.png</PackageIcon>
-    <Version>1.0.0.2</Version>
+    <Version>1.0.4.2</Version>
     <Description>A strong and fast library to parse and evaluate formulas. It also supports custom formulas. This library is built using 'AlphaX.Parserz' library.</Description>
   </PropertyGroup>
 
