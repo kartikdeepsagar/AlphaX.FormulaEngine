@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AlphaX.Parserz" Version="1.0.4.1" />
+    <PackageReference Include="AlphaX.Parserz" Version="1.0.4.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2-beta2" />
   </ItemGroup>
 

@@ -12,7 +12,7 @@ namespace AlphaX.FormulaEngine.Benchmark
         private static Stopwatch _benchmarkWatch;
         private static IFormulaEngine _formulaEngine;
 
-        public static void RunBenchmarks()
+        public static void RunBenchmarks(int arguments = 500)
         {
             _formulaEngine = new AlphaXFormulaEngine();
             _expressionWatch = new Stopwatch();
@@ -23,7 +23,7 @@ namespace AlphaX.FormulaEngine.Benchmark
             Console.WriteLine();
 
             Console.WriteLine("Cooking expressions...");
-            var expressions = CookExpressions();           
+            var expressions = CookExpressions(arguments);           
             Console.WriteLine("Expressions cooked...");
 
             Console.WriteLine();
@@ -34,43 +34,43 @@ namespace AlphaX.FormulaEngine.Benchmark
             }
 
             _benchmarkWatch.Stop();
-            Console.WriteLine($"Yay! Benchmark completed in {_benchmarkWatch.Elapsed.TotalSeconds} seconds.");
+            Console.WriteLine($"Yay! Benchmark completed in {_benchmarkWatch.Elapsed.TotalMilliseconds} ms.");
             Console.ReadKey();
         }
 
-        private static List<FormulaExpression> CookExpressions()
+        private static List<FormulaExpression> CookExpressions(int arguments)
         {
             var rnd = new Random();
             var expressions = new List<FormulaExpression>();
 
             for (int test = 1; test <= 5; test++)
             {
-                expressions.Add(CreateSumFormulaExpressionWithIntegers(5000));
+                expressions.Add(CreateSumFormulaExpressionWithIntegers(arguments));
             }
 
             for (int test = 1; test <= 5; test++)
             {
-                expressions.Add(CreateSumFormulaExpressionWithDoubles(5000));
+                expressions.Add(CreateSumFormulaExpressionWithDoubles(arguments));
             }
 
             for (int test = 1; test <= 5; test++)
             {
-                expressions.Add(CreateAverageFormulaExpressionWithIntegers(5000));
+                expressions.Add(CreateAverageFormulaExpressionWithIntegers(arguments));
             }
 
             for (int test = 1; test <= 5; test++)
             {
-                expressions.Add(CreateAverageFormulaExpressionWithDoubles(5000));
+                expressions.Add(CreateAverageFormulaExpressionWithDoubles(arguments));
             }
 
             for (int test = 1; test <= 5; test++)
             {
-                expressions.Add(CreateUpperFormulaExpression(50000));
+                expressions.Add(CreateUpperFormulaExpression(arguments));
             }
 
             for (int test = 1; test <= 5; test++)
             {
-                expressions.Add(CreateLowerFormulaExpression(50000));
+                expressions.Add(CreateLowerFormulaExpression(arguments));
             }
 
             return expressions;
@@ -97,17 +97,18 @@ namespace AlphaX.FormulaEngine.Benchmark
             else
                 Console.WriteLine($"Evaluation result : {result.Value}");
 
-            Console.WriteLine($"AlphaX Expression evaluated in {_expressionWatch.Elapsed.TotalSeconds} seconds.");
+            Console.WriteLine($"Evaluation time : {_expressionWatch.Elapsed.TotalSeconds} seconds.");
             Console.WriteLine();
         }
 
+        static Random _random = new Random();
         private static FormulaExpression CreateSumFormulaExpressionWithIntegers(int argumentCount)
         {
             var expression = new FormulaExpression();
-            Random random = new Random();
+
             var builder = new StringBuilder();
             builder.Append("SUM(");
-            var values = Enumerable.Range(1, argumentCount).Select(x => random.Next(1, 10000)).ToList();
+            var values = Enumerable.Range(1, argumentCount).Select(x => _random.Next(1, 10000)).ToList();
             builder.Append(string.Join(",", values));
             builder.Append(")");
             expression.Value = builder.ToString();
@@ -119,10 +120,9 @@ namespace AlphaX.FormulaEngine.Benchmark
         private static FormulaExpression CreateSumFormulaExpressionWithDoubles(int argumentCount)
         {
             var expression = new FormulaExpression();
-            Random random = new Random();
             var builder = new StringBuilder();
             builder.Append("SUM(");
-            var values = Enumerable.Range(1, argumentCount).Select(x => random.Next(1, 10000) * random.NextDouble()).ToList();
+            var values = Enumerable.Range(1, argumentCount).Select(x => Math.Round(_random.Next(1, 10000) * _random.NextDouble(), 2)).ToList();
             builder.Append(string.Join(",", values));
             builder.Append(")");
             expression.Value = builder.ToString();
@@ -134,10 +134,9 @@ namespace AlphaX.FormulaEngine.Benchmark
         private static FormulaExpression CreateAverageFormulaExpressionWithIntegers(int argumentCount)
         {
             var expression = new FormulaExpression();
-            Random random = new Random();
             var builder = new StringBuilder();
-            builder.Append("SUM(");
-            var values = Enumerable.Range(1, argumentCount).Select(x => random.Next(1, 10000)).ToList();
+            builder.Append("AVERAGE(");
+            var values = Enumerable.Range(1, argumentCount).Select(x => _random.Next(1, 10000)).ToList();
             builder.Append(string.Join(",", values));
             builder.Append(")");
             expression.Value = builder.ToString();
@@ -149,10 +148,9 @@ namespace AlphaX.FormulaEngine.Benchmark
         private static FormulaExpression CreateAverageFormulaExpressionWithDoubles(int argumentCount)
         {
             var expression = new FormulaExpression();
-            Random random = new Random();
             var builder = new StringBuilder();
-            builder.Append("SUM(");
-            var values = Enumerable.Range(1, argumentCount).Select(x => random.Next(1, 10000) * random.NextDouble()).ToList();
+            builder.Append("AVERAGE(");
+            var values = Enumerable.Range(1, argumentCount).Select(x => Math.Round(_random.Next(1, 10000) * _random.NextDouble(), 2)).ToList();
             builder.Append(string.Join(",", values));
             builder.Append(")");
             expression.Value = builder.ToString();
@@ -164,10 +162,9 @@ namespace AlphaX.FormulaEngine.Benchmark
         private static FormulaExpression CreateUpperFormulaExpression(int length)
         {
             var expression = new FormulaExpression();
-            Random random = new Random();
             var builder = new StringBuilder();
             builder.Append("UPPER(");
-            var value = RandomString(length, random, true);
+            var value = RandomString(length, _random, true);
             builder.Append($"\"{value}\"");
             builder.Append(")");
             expression.Value = builder.ToString();
@@ -179,10 +176,9 @@ namespace AlphaX.FormulaEngine.Benchmark
         private static FormulaExpression CreateLowerFormulaExpression(int length)
         {
             var expression = new FormulaExpression();
-            Random random = new Random();
             var builder = new StringBuilder();
             builder.Append("LOWER(");
-            var value = RandomString(length, random);
+            var value = RandomString(length, _random);
             builder.Append($"\"{value}\"");
             builder.Append(")");
             expression.Value = builder.ToString();

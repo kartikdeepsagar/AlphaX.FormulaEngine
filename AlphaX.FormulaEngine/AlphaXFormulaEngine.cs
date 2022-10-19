@@ -78,7 +78,7 @@ namespace AlphaX.FormulaEngine
                     else
                         arguments.Add(argResult);
                 }
-                else if(item.Type == ParserResultType.Decimal || item.Type == ParserResultType.String)
+                else if(item.Type == ParserResultType.Number || item.Type == ParserResultType.String)
                 {
                     arguments.Add(item.Value);
                 }             
