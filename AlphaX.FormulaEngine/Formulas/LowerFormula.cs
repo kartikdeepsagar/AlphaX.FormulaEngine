@@ -6,8 +6,8 @@
 
         public LowerFormula() : base("LOWER", 1, 1)
         {
-            Info = new FormulaInfo("",
-                new FormulaArgument("value", typeof(string), true, 0, ""));
+            Info = new FormulaInfo("Converts all letters in a text string to lowercase.",
+                new FormulaArgument("value", typeof(string), true, 0, "String to convert."));
         }
 
         public override object Evaluate(params object[] args)

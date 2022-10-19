@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace AlphaX.FormulaEngine
 {
     public class FormulaInfo
     {
+        private string _formattedValue;
+
         /// <summary>
         /// Gets the formula description.
         /// </summary>
@@ -17,6 +21,34 @@ namespace AlphaX.FormulaEngine
         {
             Description = description;
             Arguments = arguments;
+        }
+
+        public override string ToString()
+        {
+            if(_formattedValue == null)
+            {
+                var stringBuilder = new StringBuilder();
+                stringBuilder.Append("Description : ");
+                stringBuilder.Append(Description);
+                stringBuilder.AppendLine();
+                stringBuilder.AppendLine();
+
+                if (Arguments != null && Arguments.Length > 0)
+                {
+                    stringBuilder.AppendLine("Arguments");
+                    stringBuilder.AppendLine();
+
+                    foreach (var argument in Arguments)
+                    {
+                        var usage = argument.Required ? "[Required]" : "[Optional]";
+                        stringBuilder.AppendLine(argument.Index + 1 + ") " + argument.Name + " : " + argument.Description + " " + usage);
+                    }
+                }
+
+                _formattedValue = stringBuilder.ToString();
+            }
+
+            return _formattedValue;
         }
     }
 }

@@ -9,4 +9,12 @@ namespace AlphaX.FormulaEngine
 
         }
     }
+
+    public class AlphaXFormulaEngineException : Exception
+    {
+        public AlphaXFormulaEngineException(string message) : base(message)
+        {
+
+        }
+    }
 }

@@ -6,8 +6,8 @@
 
         public AverageFormula() : base("AVERAGE", 1, int.MaxValue)
         {
-            Info = new FormulaInfo("", 
-                new FormulaArgument("values", typeof(double[]), true, 0, ""));
+            Info = new FormulaInfo("Returns the average (arithmetic mean) of its arguments.", 
+                new FormulaArgument("values", typeof(double[]), true, 0, "Array of numeric values."));
         }
 
 

@@ -3,6 +3,7 @@ using AlphaX.Parserz;
 using AlphaX.Parserz.Results;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AlphaX.FormulaEngine
 {
@@ -96,6 +97,24 @@ namespace AlphaX.FormulaEngine
         public void AddFormula(Formula formula)
         {
             _formulas.Add(formula.Name, formula);
+        }
+
+        public IEnumerable<FormulaInfo> GetFormulas()
+        {
+            return _formulas.Values.Select(x => x.Info);
+        }
+
+        public void RemoveFormula(string formulaName)
+        {
+            if(_formulas.ContainsKey(formulaName))
+                _formulas.Remove(formulaName);
+
+            throw new AlphaXFormulaEngineException($"Invalid formula '{formulaName}'");
+        }
+
+        public void RemoveFormula(Formula formula)
+        {
+            RemoveFormula(formula.Name);
         }
     }
 }
