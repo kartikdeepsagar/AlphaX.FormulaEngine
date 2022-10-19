@@ -2,13 +2,7 @@
 {
     public class SumFormula : Formula
     {
-        public override FormulaInfo Info { get; }
-
-        public SumFormula() : base("SUM", 1, int.MaxValue)
-        {
-            Info = new FormulaInfo("Returns the sum of its arguments.",
-                new FormulaArgument("values", typeof(double[]), true, 0, "Array of numeric values"));
-        }
+        public SumFormula() : base("SUM") { }
 
         public override object Evaluate(params object[] args)
         {
@@ -18,6 +12,12 @@
                 sum += (double)args[index];
 
             return sum;
+        }
+
+        protected override FormulaInfo GetFormulaInfo()
+        {
+            return new FormulaInfo("Returns the sum of its arguments.", 1, int.MaxValue,
+                new FormulaArgument("values", typeof(double[]), true, 0, "Array of numeric values"));
         }
     }
 }

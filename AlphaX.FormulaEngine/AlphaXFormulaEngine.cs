@@ -82,10 +82,10 @@ namespace AlphaX.FormulaEngine
                 else if(item.Type == ParserResultType.Number || item.Type == ParserResultType.String)
                 {
                     arguments.Add(item.Value);
-                }             
+                }
             }
 
-            if (formula != null && (arguments.Count > formula.MaxArgsCount || arguments.Count < formula.MinArgsCount))
+            if (formula != null && (arguments.Count > formula.Info.MaxArgsCount || arguments.Count < formula.Info.MinArgsCount))
                 throw new EvaluationException($"Invalid number of arguments for '{formula.Name}' formula");
 
             if (formula == null)

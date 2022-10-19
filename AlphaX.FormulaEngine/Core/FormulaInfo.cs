@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Linq;
 using System.Text;
 
 namespace AlphaX.FormulaEngine
@@ -16,11 +15,23 @@ namespace AlphaX.FormulaEngine
         /// Gets the formula arguments.
         /// </summary>
         public FormulaArgument[] Arguments { get; }
+        public int MinArgsCount { get; }
+        public int MaxArgsCount { get; }
 
         public FormulaInfo(string description, params FormulaArgument[] arguments)
         {
             Description = description;
             Arguments = arguments;
+            MinArgsCount = Arguments.Count(x => x.Required);
+            MaxArgsCount = Arguments.Length;
+        }
+
+        public FormulaInfo(string description, int minArgs, int maxArgs, params FormulaArgument[] arguments)
+        {
+            Description = description;
+            Arguments = arguments;
+            MinArgsCount = minArgs;
+            MaxArgsCount = maxArgs;
         }
 
         public override string ToString()
