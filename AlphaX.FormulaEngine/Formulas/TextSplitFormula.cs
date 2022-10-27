@@ -2,7 +2,7 @@
 
 namespace AlphaX.FormulaEngine.Formulas
 {
-    public class TextSplitFormula : Formula
+    internal class TextSplitFormula : Formula
     {
         public TextSplitFormula() : base("TEXTSPLIT") { }
 

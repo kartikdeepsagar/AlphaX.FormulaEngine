@@ -1,6 +1,6 @@
 ﻿namespace AlphaX.FormulaEngine.Formulas
 {
-    public class UpperFormula : Formula
+    internal class UpperFormula : Formula
     {
         public UpperFormula() : base("UPPER") { }
 

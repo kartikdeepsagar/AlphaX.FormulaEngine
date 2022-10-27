@@ -1,6 +1,6 @@
 ﻿namespace AlphaX.FormulaEngine.Formulas
 {
-    public class AverageFormula : Formula
+    internal class AverageFormula : Formula
     {
         public AverageFormula() : base("AVERAGE") { }
 

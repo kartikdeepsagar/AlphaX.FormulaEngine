@@ -1,5 +1,4 @@
-﻿using AlphaX.FormulaEngine.Formulas;
-using AlphaX.Parserz;
+﻿using AlphaX.Parserz;
 using AlphaX.Parserz.Results;
 using System;
 using System.Collections.Generic;
@@ -18,11 +17,7 @@ namespace AlphaX.FormulaEngine
             Settings = FormulaEngineSettings.Default;
             Settings.Update();
             _formulas = new Dictionary<string, Formula>();
-            AddFormula(new SumFormula());
-            AddFormula(new AverageFormula());
-            AddFormula(new LowerFormula());
-            AddFormula(new UpperFormula());
-            AddFormula(new TextSplitFormula());
+            DefaultFormulas.Load(this);        
         }
 
         public IEvaluationResult Evaluate(string input)

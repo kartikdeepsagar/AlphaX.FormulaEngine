@@ -1,6 +1,6 @@
 ﻿namespace AlphaX.FormulaEngine.Formulas
 {
-    public class SumFormula : Formula
+    internal class SumFormula : Formula
     {
         public SumFormula() : base("SUM") { }
 
