@@ -38,7 +38,7 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            var numberParser = Parser.Number(CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator)
+            var numberParser = Parser.Number(true)
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
