@@ -32,7 +32,7 @@ Please provide your feedback or suggestions here - https://docs.google.com/forms
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AlphaX.Parserz" Version="1.0.5" />
+    <PackageReference Include="AlphaX.Parserz" Version="1.0.7" />
   </ItemGroup>
 
   <ItemGroup>
