@@ -88,4 +88,4 @@ Console.WriteLine(result.Value); // 64
 ```
 That's all of it :-)
 
-Feedback is very much appreciated : https://docs.google.com/forms/d/e/1FAIpQLSfKVz5KlycuTM9j7ZQApk0_vK7OEyGK-wCUUDSfPocHWq9MFg/viewform?usp=share_link
+Feedback is very much appreciated : https://forms.gle/dfv8E8zpC2qPJS7i7
