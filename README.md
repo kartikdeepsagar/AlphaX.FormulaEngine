@@ -86,6 +86,29 @@ engine.AddFormula(new MyFormula());
 AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("MyFormula(4,3)");
 Console.WriteLine(result.Value); // 64
 ```
+# Customizing Engine Settings
+
+AlphaXFormulaEngine allows you to customize the formula string format. By, default the formula format is :
+
+FormulaName(argument1, argument2, argument3......)
+
+However, you can customize this as per your needs. For example, you can change it to:
+
+FormulaName[argument1 | argument 2 | argument 3....]
+
+Doing this is a piece of cake using engine settings as follows:
+```c#
+AlphaX.FormulaEngine.AlphaXFormulaEngine engine = new AlphaX.FormulaEngine.AlphaXFormulaEngine();
+engine.Settings.ArgumentsSeparatorSymbol = "|";
+engine.Settings.OpenBracketSymbol = "[";
+engine.Settings.CloseBracketSymbol = "]";
+engine.Settings.Update();
+
+engine.AddFormula(new MyFormula());
+AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("MyFormula[4|3]");
+Console.WriteLine(result.Value); // 64
+```
+
 That's all of it :-)
 
 Feedback is very much appreciated : https://forms.gle/dfv8E8zpC2qPJS7i7
