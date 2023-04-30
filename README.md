@@ -108,6 +108,13 @@ engine.AddFormula(new MyFormula());
 AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("MyFormula[4|3]");
 Console.WriteLine(result.Value); // 64
 ```
+# Nested Formulas
+
+To make your life easy, we have also added support for nested formulas. So, you can use a formula as a formula argument for another formula as follows:
+```c#
+AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("MyFormula(4, MyFormula(2,2))");
+Console.WriteLine(result.Value); // 256
+```
 
 That's all of it :-)
 
