@@ -15,6 +15,10 @@ namespace AlphaX.FormulaEngine
         };
 
         /// <summary>
+        /// Gets or sets whether the engine supports single/double quote for string inputs. (Default is true).
+        /// </summary>
+        public bool DoubleQuotedStrings { get; set; } = true;
+        /// <summary>
         /// Gets or sets the formula open brakcet symbol.
         /// </summary>
         public string OpenBracketSymbol { get; set; }

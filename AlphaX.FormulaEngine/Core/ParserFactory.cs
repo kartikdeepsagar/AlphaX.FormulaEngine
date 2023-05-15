@@ -34,7 +34,11 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => new FormulaNameResult(x.Value[0].Value.ToString()));
 
-            var stringValueParser = new StringValueParser()
+            var stringValueParser = Parser.StringValue(settings.DoubleQuotedStrings)
+                .AndThen(whiteSpacesParser)
+                .MapResult(x => x.Value[0]);
+
+            var booleanParser = Parser.Boolean
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
@@ -42,9 +46,54 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            var formulaArgumentParser = numberParser
-                .Or(stringValueParser)
+            var logicalOperatorParsers = Parser.String("==")
+              .Or(Parser.String("!="))
+              .Or(Parser.String("<="))
+              .Or(Parser.String(">="))
+              .Or(Parser.String("<"))
+              .Or(Parser.String(">"))
+              .AndThen(whiteSpacesParser)
+              .MapResult(x => x.Value[0]);
+
+            var baseArgumentParser = stringValueParser
+                .Or(numberParser)
+                .Or(booleanParser)
                 .Or(Parser.Lazy(() => FormulaParser));
+
+            var formulaArgumentParser = baseArgumentParser.Next(leftOperandResult =>
+                {
+                    return logicalOperatorParsers.Many(0, 1)
+                    .MapResult(result =>
+                    {
+                        if (result.Value.Length > 0)
+                        {
+                            return new OperatorResult(result.Value[0].Value?.ToString());
+                        }
+                        else
+                        {
+                            return leftOperandResult;
+                        }
+                    })
+                    .Next(operatorResult =>
+                    {
+                        if (operatorResult.Type != FormulaParserResultType.Operator)
+                        {
+                            return new ResultParser(leftOperandResult);
+                        }
+                        else
+                        {
+                            return baseArgumentParser.MapResult(rightOperandResult =>
+                                {
+                                    return new ConditionResult(new Condition(
+                                    
+                                        leftOperandResult.Value,
+                                        operatorResult.Value?.ToString(),
+                                        rightOperandResult.Value
+                                    ));
+                                }).MapError(x => new ParserError(x.Index, "Invalid logical expression"));
+                        }
+                    });
+                });
 
             var commaResult = new FormulaArgumentSeperatorResult(settings.ArgumentsSeparatorSymbol);
             var commaParser = Parser.String(settings.ArgumentsSeparatorSymbol)

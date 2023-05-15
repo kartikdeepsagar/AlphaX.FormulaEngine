@@ -1,4 +1,5 @@
 ﻿using AlphaX.Parserz;
+using AlphaX.Parserz.Interfaces;
 using AlphaX.Parserz.Results;
 using System;
 using System.Collections.Generic;
@@ -74,9 +75,26 @@ namespace AlphaX.FormulaEngine
                     else
                         arguments.Add(argResult);
                 }
-                else if(item.Type == ParserResultType.Number || item.Type == ParserResultType.String)
+                else if(item.Type == ParserResultType.Number || item.Type == ParserResultType.String || item.Type == FormulaParserResultType.Operator
+                    || item.Type == ParserResultType.Boolean)
                 {
                     arguments.Add(item.Value);
+                }
+                else if(item.Type == FormulaParserResultType.Condition)
+                {
+                    var condition = item.Value as Condition;
+
+                    if(condition.LeftOperand is IParserResult[] lArray)
+                    {
+                        condition.LeftOperand = Evaluate(new ArrayResult(lArray));
+                    }
+
+                    if (condition.RightOperand is IParserResult[] rArray)
+                    {
+                        condition.RightOperand = Evaluate(new ArrayResult(rArray));
+                    }
+
+                    arguments.Add(condition);
                 }
             }
 

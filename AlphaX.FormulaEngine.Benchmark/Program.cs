@@ -12,7 +12,7 @@ namespace AlphaX.FormulaEngine.Benchmark
     {  
         static void Main(string[] args)
         {
-            FormulaEngineBenchmark.RunBenchmarks(5000);
+            FormulaEngineBenchmark.RunBenchmarks(500);
         }
     }
 }

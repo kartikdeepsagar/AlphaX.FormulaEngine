@@ -14,6 +14,7 @@ namespace AlphaX.FormulaEngine
             engine.AddFormula(new TodayFormula());
             engine.AddFormula(new ConcatFormula());
             engine.AddFormula(new NowFormula());
+            engine.AddFormula(new IFFormula());
         }
     }
 }
