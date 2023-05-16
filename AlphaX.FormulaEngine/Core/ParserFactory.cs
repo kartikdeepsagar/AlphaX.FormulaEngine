@@ -1,9 +1,5 @@
 ﻿using AlphaX.FormulaEngine.Resources;
 using AlphaX.Parserz;
-using AlphaX.Parserz.Extensions;
-using AlphaX.Parserz.Interfaces;
-using AlphaX.Parserz.Results;
-using System.Globalization;
 
 namespace AlphaX.FormulaEngine
 {
@@ -78,7 +74,7 @@ namespace AlphaX.FormulaEngine
                     {
                         if (operatorResult.Type != FormulaParserResultType.Operator)
                         {
-                            return new ResultParser(leftOperandResult);
+                            return Parser.FromResult(leftOperandResult);
                         }
                         else
                         {
