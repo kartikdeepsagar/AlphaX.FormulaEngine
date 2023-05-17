@@ -2,12 +2,8 @@
 
 namespace AlphaX.FormulaEngine
 {
-    public class FormulaArgument
+    public abstract class FormulaArgument
     {
-        /// <summary>
-        /// Gets the position of the argument.
-        /// </summary>
-        public int Index { get; }
         /// <summary>
         /// Gets the name of the argument.
         /// </summary>
@@ -20,18 +16,54 @@ namespace AlphaX.FormulaEngine
         /// Gets if the argument is required.
         /// </summary>
         public bool Required { get; }
-        /// <summary>
-        /// Gets the description of the argument.
-        /// </summary>
-        public string Description { get; }
+        public bool IsArray { get; }
 
-        public FormulaArgument(string name, Type type, bool required, int index, string description)
+        public FormulaArgument(string name, Type type, bool required)
         {
             Name = name;
             Type = type;
             Required = required;
-            Index = index;
-            Description = description;
+            IsArray = type.IsArray;
+        }
+    }
+
+    public class DoubleArgument : FormulaArgument
+    {
+        public DoubleArgument(string name, bool required) : base(name, typeof(double), required)
+        {
+            
+        }
+    }
+
+    public class StringArgument : FormulaArgument
+    {
+        public StringArgument(string name, bool required) : base(name, typeof(string), required)
+        {
+
+        }
+    }
+
+    public class BooleanArgument : FormulaArgument
+    {
+        public BooleanArgument(string name, bool required) : base(name, typeof(bool), required)
+        {
+
+        }
+    }
+
+    public class StringArrayArgument : FormulaArgument
+    {
+        public StringArrayArgument(string name, bool required) : base(name, typeof(string[]), required)
+        {
+
+        }
+    }
+
+    public class DoubleArrayArgument : FormulaArgument
+    {
+        public DoubleArrayArgument(string name, bool required) : base(name, typeof(double[]), required)
+        {
+
         }
     }
 }

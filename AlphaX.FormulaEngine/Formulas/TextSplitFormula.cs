@@ -13,9 +13,10 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            return new FormulaInfo("Splits a text string into substrings using the provided seperator.",
-                new FormulaArgument("seperator", typeof(string), true, 0, "A string that delimits the substrings in this string."),
-                new FormulaArgument("value", typeof(string), true, 1, "String to split."));
+            FormulaInfo info = new FormulaInfo();
+            info.AddArgument(new StringArgument("seperator", true));
+            info.AddArgument(new StringArgument("value", true));
+            return info;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace AlphaX.FormulaEngine
+﻿using System;
+
+namespace AlphaX.FormulaEngine
 {
     public abstract class Formula
     {
@@ -15,6 +17,9 @@
         {
             Name = name;
             Info = GetFormulaInfo();
+
+            if(Info == null)
+                throw new ArgumentNullException(nameof(Info));
         }
 
         /// <summary>
@@ -25,5 +30,10 @@
         public abstract object Evaluate(params object[] args);
 
         protected abstract FormulaInfo GetFormulaInfo();
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

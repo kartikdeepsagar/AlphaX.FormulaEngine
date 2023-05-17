@@ -15,8 +15,9 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            return new FormulaInfo("Joines/merges multiple text strings into one text string", 1, int.MaxValue,
-                new FormulaArgument("values", typeof(string[]), true, 0, "Array of string values"));
+            FormulaInfo info = new FormulaInfo();
+            info.AddArgument(new StringArrayArgument("values", true));
+            return info;
         }
     }
 }

@@ -14,8 +14,9 @@
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            return new FormulaInfo("Converts all letters in a text string to lowercase.",
-                new FormulaArgument("value", typeof(string), true, 0, "String to convert."));
+            FormulaInfo info = new FormulaInfo();
+            info.AddArgument(new StringArgument("value", true));
+            return info;
         }
     }
 }

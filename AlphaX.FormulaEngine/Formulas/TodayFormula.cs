@@ -16,7 +16,7 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            return new FormulaInfo("Gets current system date");
+            return new FormulaInfo();
         }
     }
 }

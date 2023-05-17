@@ -64,11 +64,11 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            return new FormulaInfo("checks a given condition and returns a particular value if it is TRUE. " +
-                "It will return another value if the condition is FALSE",
-                new FormulaArgument("condition", typeof(string), true, 0, "condition to check"),
-                new FormulaArgument("value1", typeof(string), true, 1, "value if true"),
-                new FormulaArgument("value2", typeof(string), true, 2, "value if false"));
+            FormulaInfo info = new FormulaInfo();
+            info.AddArgument(new StringArgument("condition", true));
+            info.AddArgument(new StringArgument("value1", true));
+            info.AddArgument(new StringArgument("value2", true));
+            return info;
         }
     }
 }

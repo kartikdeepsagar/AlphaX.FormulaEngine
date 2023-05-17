@@ -79,14 +79,13 @@ namespace AlphaX.FormulaEngine
                         else
                         {
                             return baseArgumentParser.MapResult(rightOperandResult =>
-                                {
-                                    return new ConditionResult(new Condition(
-                                    
-                                        leftOperandResult.Value,
-                                        operatorResult.Value?.ToString(),
-                                        rightOperandResult.Value
-                                    ));
-                                }).MapError(x => new ParserError(x.Index, "Invalid logical expression"));
+                            {
+                                 return new ConditionResult(new Condition(                                  
+                                      leftOperandResult.Value,
+                                      operatorResult.Value?.ToString(),
+                                      rightOperandResult.Value
+                                 ));
+                            }).MapError(x => new ParserError(x.Index, "Invalid logical expression"));
                         }
                     });
                 });
