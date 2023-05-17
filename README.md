@@ -8,14 +8,14 @@ A strong and fast library to parse and evaluate formulas. It also supports custo
 For evaluating formulas using AlphaXFormulaEngine, you can simply initialize the engine and start using its Evaluate method:
 ```c#
 AlphaX.FormulaEngine.AlphaXFormulaEngine engine = new AlphaX.FormulaEngine.AlphaXFormulaEngine();
-AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("SUM(1,2,12.3,5.9099)");
+AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("SUM([1,2,12.3,5.9099])");
 Console.WriteLine(result.Value); // 21.2099
 ```
 
 AlphaXFormulaEngine comes with a limited number (not many) of inbuilt formulas i.e. 
 
-- SUM - Returns sum of provided values. For example: SUM(1,2,4) // 7
-- AVERAGE - Returns average of provided values. For example: AVERAGE(3,2,4) // 3
+- SUM - Returns sum of provided values. For example: SUM([1,2,4]) // 7
+- AVERAGE - Returns average of provided values. For example: AVERAGE([3,2,4]) // 3
 - LOWER - Returns lower cased string. For example: LOWER("TESTSTRING") // teststring
 - UPPER - Returns upper cased string. For example: UPPER("teststring") // TESTSTRING
 - TEXTSPLIT - Returns splitted string using a seperator. For example: TEXTSPLIT(".", "John.Doe") // John  Doe
@@ -68,9 +68,10 @@ public override object Evaluate(params object[] args)
 ```c#
 protected override FormulaInfo GetFormulaInfo()
 {
-    return new FormulaInfo("Returns the number raised to the power.", 2, 2,
-        new FormulaArgument("number", typeof(double), true, 0, "The number"),
-        new FormulaArgument("power", typeof(double), true, 1, "Power"));
+    var info = new FormulaInfo();
+    info.AddArgument(new DoubleArgument("number", true));
+    info.AddArgument(new DoubleArgument("number", true));
+    return info;
 }
 ```
 The above code defines that our formula:
