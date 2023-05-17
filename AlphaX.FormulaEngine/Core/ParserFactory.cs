@@ -30,6 +30,11 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => new FormulaNameResult(x.Value[0].Value.ToString()));
 
+            var customNameParser = Parser.String("$")
+                .AndThen(Parser.AnyLetterOrDigit().Many().MapResult(x => x.ToStringResult()))
+                .AndThen(whiteSpacesParser)
+                .MapResult(x => new CustomNameResult(new CustomName(x.Value[1].Value?.ToString())));
+
             var stringValueParser = Parser.StringValue(settings.DoubleQuotedStrings)
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
@@ -41,15 +46,6 @@ namespace AlphaX.FormulaEngine
             var numberParser = Parser.Number(true)
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
-
-            var logicalOperatorParsers = Parser.String("==")
-              .Or(Parser.String("!="))
-              .Or(Parser.String("<="))
-              .Or(Parser.String(">="))
-              .Or(Parser.String("<"))
-              .Or(Parser.String(">"))
-              .AndThen(whiteSpacesParser)
-              .MapResult(x => x.Value[0]);
 
             var arrayCommaResult = new StringResult(",");
             var arrayCommaParser = Parser.String(",")
@@ -63,7 +59,17 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[2]);
 
+            var logicalOperatorParsers = Parser.String("==")
+              .Or(Parser.String("!="))
+              .Or(Parser.String("<="))
+              .Or(Parser.String(">="))
+              .Or(Parser.String("<"))
+              .Or(Parser.String(">"))
+              .AndThen(whiteSpacesParser)
+              .MapResult(x => x.Value[0]);
+
             var baseArgumentParser = arrayParser
+                .Or(customNameParser)
                 .Or(stringValueParser)
                 .Or(numberParser)
                 .Or(booleanParser)

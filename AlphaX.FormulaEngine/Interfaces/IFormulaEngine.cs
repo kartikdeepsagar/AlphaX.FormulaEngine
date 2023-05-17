@@ -33,6 +33,6 @@ namespace AlphaX.FormulaEngine
         /// Gets information related to registered formulas.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<FormulaInfo> GetFormulas();
+        IEnumerable<Formula> GetFormulas();
     }
 }

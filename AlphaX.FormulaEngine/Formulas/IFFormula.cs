@@ -14,7 +14,7 @@ namespace AlphaX.FormulaEngine.Formulas
         {
             if (args.Length == 3)
             {
-                var condition = args[0] as Condition;
+                var condition = (Condition)args[0];
                 var result = Compare(condition);
 
                 if (result)

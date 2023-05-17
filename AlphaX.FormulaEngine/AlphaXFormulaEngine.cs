@@ -8,12 +8,14 @@ namespace AlphaX.FormulaEngine
 {
     public class AlphaXFormulaEngine : IFormulaEngine
     {
+        private IEngineContext _context;
         private Dictionary<string, Formula> _formulas;
 
         public FormulaEngineSettings Settings { get; }
 
-        public AlphaXFormulaEngine()
+        public AlphaXFormulaEngine(IEngineContext context = null)
         {
+            _context = context;
             Settings = FormulaEngineSettings.Default;
             Settings.Update();
             _formulas = new Dictionary<string, Formula>();
@@ -71,6 +73,10 @@ namespace AlphaX.FormulaEngine
                     var argResult = Evaluate(item as ArrayResult);
                     arguments.Add(argResult);
                 }
+                else if(item.Type == FormulaParserResultType.CustomName)
+                {
+                    arguments.Add(item.Value);
+                }
                 else if(item.Type == ParserResultType.Number || item.Type == ParserResultType.String || item.Type == FormulaParserResultType.Operator
                     || item.Type == ParserResultType.Boolean)
                 {
@@ -78,7 +84,7 @@ namespace AlphaX.FormulaEngine
                 }
                 else if(item.Type == FormulaParserResultType.Condition)
                 {
-                    var condition = item.Value as Condition;
+                    var condition = (Condition)item.Value;
 
                     if(condition.LeftOperand is IParserResult[] lArray)
                     {
@@ -94,7 +100,7 @@ namespace AlphaX.FormulaEngine
                 }
             }
 
-            ValidateArguments(formula, arguments.ToArray());
+            ValidateAndResolveArguments(formula, arguments.ToArray());
 
             if (formula == null)
                 return arguments.ToArray();
@@ -102,7 +108,7 @@ namespace AlphaX.FormulaEngine
             return formula.Evaluate((object[])arguments[0]);
         }
 
-        private void ValidateArguments(Formula formula, object[] arguments)
+        private void ValidateAndResolveArguments(Formula formula, object[] arguments)
         {
             if (formula == null)
                 return;
@@ -117,17 +123,50 @@ namespace AlphaX.FormulaEngine
                 for(int index = 0; index < formula.Info.MaxArgsCount; index++)
                 {
                     var argumentData = formula.Info.Arguments[index];
+
+                    if (index > arguments.Length - 1)
+                        break;
+
                     var argument = arguments[index];
-                    var isArray = argumentData.Type.IsArray;
 
-                    if (isArray && (argument.GetType() != typeof(object[])))
+                    if (argument is CustomName cName)
                     {
-                        throw new EvaluationException($"Argument: {argumentData.Name}, Argument type doesn't match for '{formula.Name}' formula");
+                        if(formula.RequireContext)
+                        {
+                            if (_context == null)
+                            {
+                                throw new EvaluationException("Formula require context but no context found.");
+                            }
+
+                            var resolvedValue = _context.Resolve(cName.Value);
+
+                            if (resolvedValue != null && resolvedValue.GetType() != argumentData.Type)
+                            {
+                                throw new EvaluationException($"Argument: {argumentData.Name}, Argument type doesn't match for '{formula.Name}' formula");
+                            }
+                            else
+                            {
+                                arguments[index] = resolvedValue;
+                            }
+                        }
+                        else
+                        {
+                            arguments[index] = cName.Value;
+                        }
                     }
-
-                    if(!isArray && argumentData.Type != typeof(object) && (argumentData.Type != argument.GetType()))
+                    else
                     {
-                        throw new EvaluationException($"Argument: {argumentData.Name}, Argument type doesn't match for '{formula.Name}' formula");
+                        var isArray = argumentData.Type.IsArray;
+
+                        if (isArray && (argument.GetType() != typeof(object[])))
+                        {
+                            throw new EvaluationException($"Argument: {argumentData.Name}, Argument type doesn't match for '{formula.Name}' formula");
+                        }
+
+                        if (!isArray && argumentData.Type != typeof(object) && (argumentData.Type != argument.GetType()))
+                        {
+                            throw new EvaluationException($"Argument: {argumentData.Name}, Argument type doesn't match for '{formula.Name}' formula");
+                        }
                     }
                 }
             }
@@ -138,9 +177,9 @@ namespace AlphaX.FormulaEngine
             _formulas.Add(formula.Name, formula);
         }
 
-        public IEnumerable<FormulaInfo> GetFormulas()
+        public IEnumerable<Formula> GetFormulas()
         {
-            return _formulas.Values.Select(x => x.Info);
+            return _formulas.Values;
         }
 
         public void RemoveFormula(string formulaName)
