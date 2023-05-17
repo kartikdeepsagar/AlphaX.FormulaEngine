@@ -107,10 +107,10 @@ namespace AlphaX.FormulaEngine.Benchmark
             var expression = new FormulaExpression();
 
             var builder = new StringBuilder();
-            builder.Append("SUM(");
+            builder.Append("SUM([");
             var values = Enumerable.Range(1, argumentCount).Select(x => _random.Next(1, 10000)).ToList();
             builder.Append(string.Join(",", values));
-            builder.Append(")");
+            builder.Append("])");
             expression.Value = builder.ToString();
             expression.ExpectedResult = values.Sum();
             expression.ArgumentsCount = argumentCount;
@@ -121,10 +121,10 @@ namespace AlphaX.FormulaEngine.Benchmark
         {
             var expression = new FormulaExpression();
             var builder = new StringBuilder();
-            builder.Append("SUM(");
+            builder.Append("SUM([");
             var values = Enumerable.Range(1, argumentCount).Select(x => Math.Round(_random.Next(1, 10000) * _random.NextDouble(), 2)).ToList();
             builder.Append(string.Join(",", values));
-            builder.Append(")");
+            builder.Append("])");
             expression.Value = builder.ToString();
             expression.ExpectedResult = values.Sum();
             expression.ArgumentsCount = argumentCount;
@@ -135,10 +135,10 @@ namespace AlphaX.FormulaEngine.Benchmark
         {
             var expression = new FormulaExpression();
             var builder = new StringBuilder();
-            builder.Append("AVERAGE(");
+            builder.Append("AVERAGE([");
             var values = Enumerable.Range(1, argumentCount).Select(x => _random.Next(1, 10000)).ToList();
             builder.Append(string.Join(",", values));
-            builder.Append(")");
+            builder.Append("])");
             expression.Value = builder.ToString();
             expression.ExpectedResult = values.Average();
             expression.ArgumentsCount = argumentCount;
@@ -149,10 +149,10 @@ namespace AlphaX.FormulaEngine.Benchmark
         {
             var expression = new FormulaExpression();
             var builder = new StringBuilder();
-            builder.Append("AVERAGE(");
+            builder.Append("AVERAGE([");
             var values = Enumerable.Range(1, argumentCount).Select(x => Math.Round(_random.Next(1, 10000) * _random.NextDouble(), 2)).ToList();
             builder.Append(string.Join(",", values));
-            builder.Append(")");
+            builder.Append("])");
             expression.Value = builder.ToString();
             expression.ExpectedResult = values.Average();
             expression.ArgumentsCount = argumentCount;
