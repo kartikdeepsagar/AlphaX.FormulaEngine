@@ -2,39 +2,23 @@
 
 namespace AlphaX.FormulaEngine
 {
-    public class FormulaEngineSettings
+    internal class FormulaEngineSettings : IEngineSettings
     {
-        /// <summary>
-        /// Gets the default settings.
-        /// </summary>
-        public static FormulaEngineSettings Default => new FormulaEngineSettings()
-        {
-            CloseBracketSymbol = ")",
-            OpenBracketSymbol = "(",
-            ArgumentsSeparatorSymbol = ",",
-        };
-
-        /// <summary>
-        /// Gets or sets whether the engine supports single/double quote for string inputs. (Default is true).
-        /// </summary>
-        public bool DoubleQuotedStrings { get; set; } = true;
-        /// <summary>
-        /// Gets or sets the formula open brakcet symbol.
-        /// </summary>
+        public bool DoubleQuotedStrings { get; set; }
         public string OpenBracketSymbol { get; set; }
-        /// <summary>
-        /// Gets or sets the formula close bracket symbol.
-        /// </summary>
         public string CloseBracketSymbol { get; set; }
-        /// <summary>
-        /// Gets or sets the argument seperator symbol. Default is comma (',').
-        /// </summary>
         public string ArgumentsSeparatorSymbol { get; set; }
 
-        /// <summary>
-        /// Re-inititalizes the engine with the updated settings.
-        /// </summary>
-        public void Update()
+        public FormulaEngineSettings()
+        {
+            CloseBracketSymbol = ")";
+            OpenBracketSymbol = "(";
+            ArgumentsSeparatorSymbol = ",";
+            DoubleQuotedStrings = true;
+            Save();
+        }
+
+        public void Save()
         {
             if (OpenBracketSymbol is null)
                 throw new NotSupportedException("Open bracket symbol cannot be null");

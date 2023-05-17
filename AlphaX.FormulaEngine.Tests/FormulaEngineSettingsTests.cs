@@ -26,7 +26,7 @@ namespace AlphaX.FormulaEngine.Tests
         {
             _formulaEngine.Settings.OpenBracketSymbol = "[";
             _formulaEngine.Settings.CloseBracketSymbol = "]";
-            _formulaEngine.Settings.Update();
+            _formulaEngine.Settings.Save();
             var result = _formulaEngine.Evaluate(input);
             Assert.That(result.Value, Is.EqualTo(output));
         }
@@ -41,7 +41,7 @@ namespace AlphaX.FormulaEngine.Tests
             _formulaEngine.Settings.OpenBracketSymbol = "{";
             _formulaEngine.Settings.CloseBracketSymbol = "}";
             _formulaEngine.Settings.ArgumentsSeparatorSymbol = "|";
-            _formulaEngine.Settings.Update();
+            _formulaEngine.Settings.Save();
             var result = _formulaEngine.Evaluate(input);
             Assert.IsNull(result.Error);
         }
@@ -49,19 +49,19 @@ namespace AlphaX.FormulaEngine.Tests
         public void FormulaSettings_FailureTest(string input, double output)
         {
             _formulaEngine.Settings.OpenBracketSymbol = null;
-            Assert.Throws<NotSupportedException>(() => { _formulaEngine.Settings.Update(); });
+            Assert.Throws<NotSupportedException>(() => { _formulaEngine.Settings.Save(); });
         }
 
         public void FormulaSettings_FailureTests2(string input, double output)
         {
             _formulaEngine.Settings.CloseBracketSymbol = null;
-            Assert.Throws<NotSupportedException>(() =>{ _formulaEngine.Settings.Update(); });
+            Assert.Throws<NotSupportedException>(() =>{ _formulaEngine.Settings.Save(); });
         }
 
         public void FormulaSettings_FailureTests3(string input, double output)
         {
             _formulaEngine.Settings.ArgumentsSeparatorSymbol = null;
-            Assert.Throws<NotSupportedException>(() =>{ _formulaEngine.Settings.Update(); });
+            Assert.Throws<NotSupportedException>(() =>{ _formulaEngine.Settings.Save(); });
         }
     }
 }

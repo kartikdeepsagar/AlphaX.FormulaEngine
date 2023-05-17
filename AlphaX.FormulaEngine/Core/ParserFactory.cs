@@ -1,4 +1,5 @@
-﻿using AlphaX.FormulaEngine.Resources;
+﻿
+using AlphaX.FormulaEngine.Resources;
 using AlphaX.Parserz;
 
 namespace AlphaX.FormulaEngine
@@ -7,7 +8,7 @@ namespace AlphaX.FormulaEngine
     {
         public static IParser FormulaParser { get; set; }
 
-        internal static void BuildParser(FormulaEngineSettings settings)
+        internal static void BuildParser(IEngineSettings settings)
         {
             var emtpyStringResult = new StringResult(string.Empty);
             var whiteSpacesParser = Parser.WhiteSpace.Many().MapResult(x => emtpyStringResult);
