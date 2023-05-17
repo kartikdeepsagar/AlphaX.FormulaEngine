@@ -65,9 +65,9 @@ namespace AlphaX.FormulaEngine.Formulas
         protected override FormulaInfo GetFormulaInfo()
         {
             FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new StringArgument("condition", true));
-            info.AddArgument(new StringArgument("value1", true));
-            info.AddArgument(new StringArgument("value2", true));
+            info.AddArgument(new ConditionArgument("condition", true));
+            info.AddArgument(new ObjectArgument("value1", true));
+            info.AddArgument(new ObjectArgument("value2", true));
             return info;
         }
     }

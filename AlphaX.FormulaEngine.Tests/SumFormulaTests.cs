@@ -12,18 +12,18 @@ namespace AlphaX.FormulaEngine.Tests
             _formulaEngine = new AlphaXFormulaEngine();
         }
 
-        [TestCase("SUM(1,2,3,4)", 10)]
-        [TestCase("SUM(0 ,  12,  3,1)", 16)]
-        [TestCase("SUM(-1 ,  12,  3,1)", 15)]
-        [TestCase("SUM(1.1,2.1, 3, 4.2)", 10.4)]
-        [TestCase("SUM(1, SUM(1,2,SUM(2,2)), 4)", 12)]
+        [TestCase("SUM([1,2,3,4])", 10)]
+        [TestCase("SUM([0 ,  12,  3,1])", 16)]
+        [TestCase("SUM([-1 ,  12,  3,1])", 15)]
+        [TestCase("SUM([1.1,2.1, 3, 4.2])", 10.4)]
+        [TestCase("SUM([1, SUM([1,2,SUM([2,2])]), 4])", 12)]
         public void SumFormula_SuccessTest(string input, double output)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.That(result.Value, Is.EqualTo(output));
         }
 
-        [TestCase("SUM(1,2,3 4)")]
+        [TestCase("SUM([1,2,3 4)")]
         [TestCase("SUM(0- ,  12,  3,1)")]
         [TestCase("SUM,  12,  3,1)")]
         [TestCase("SUM(..1,2.1, 3, 4.2)")]

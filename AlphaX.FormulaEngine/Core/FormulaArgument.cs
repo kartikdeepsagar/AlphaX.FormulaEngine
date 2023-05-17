@@ -16,14 +16,12 @@ namespace AlphaX.FormulaEngine
         /// Gets if the argument is required.
         /// </summary>
         public bool Required { get; }
-        public bool IsArray { get; }
 
         public FormulaArgument(string name, Type type, bool required)
         {
             Name = name;
             Type = type;
             Required = required;
-            IsArray = type.IsArray;
         }
     }
 
@@ -35,9 +33,25 @@ namespace AlphaX.FormulaEngine
         }
     }
 
+    public class ObjectArgument : FormulaArgument
+    {
+        public ObjectArgument(string name, bool required) : base(name, typeof(object), required)
+        {
+
+        }
+    }
+
     public class StringArgument : FormulaArgument
     {
         public StringArgument(string name, bool required) : base(name, typeof(string), required)
+        {
+
+        }
+    }
+
+    public class ConditionArgument : FormulaArgument
+    {
+        public ConditionArgument(string name, bool required) : base(name, typeof(Condition), required)
         {
 
         }
@@ -51,17 +65,9 @@ namespace AlphaX.FormulaEngine
         }
     }
 
-    public class StringArrayArgument : FormulaArgument
+    public class ArrayArgument : FormulaArgument
     {
-        public StringArrayArgument(string name, bool required) : base(name, typeof(string[]), required)
-        {
-
-        }
-    }
-
-    public class DoubleArrayArgument : FormulaArgument
-    {
-        public DoubleArrayArgument(string name, bool required) : base(name, typeof(double[]), required)
+        public ArrayArgument(string name, bool required) : base(name, typeof(object[]), required)
         {
 
         }

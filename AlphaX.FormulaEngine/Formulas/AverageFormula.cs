@@ -6,18 +6,19 @@
 
         public override object Evaluate(params object[] args)
         {
+            var values = (object[])args[0];
             double sum = 0;
 
-            for (int index = 0; index < args.Length; index++)
-                sum += (double)args[index];
+            for (int index = 0; index < values.Length; index++)
+                sum += (double)values[index];
 
-            return sum / args.Length;
+            return sum / values.Length;
         }
 
         protected override FormulaInfo GetFormulaInfo()
         {
             FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new DoubleArrayArgument("values", true));
+            info.AddArgument(new ArrayArgument("values", true));
             return info;
         }
     }

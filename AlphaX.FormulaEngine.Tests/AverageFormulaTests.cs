@@ -12,10 +12,10 @@ namespace AlphaX.FormulaEngine.Tests
             _formulaEngine = new AlphaXFormulaEngine();
         }
 
-        [TestCase("AVERAGE(2,2,2,2)", 2)]
-        [TestCase("AVERAGE(0 ,  12,  3,1)", 4)]
-        [TestCase("AVERAGE(-1 ,  12,  3,2)", 4)]
-        [TestCase("AVERAGE(1.4,1.4)", 1.4)]
+        [TestCase("AVERAGE([2,2,2,2])", 2)]
+        [TestCase("AVERAGE([0 ,  12,  3,1])", 4)]
+        [TestCase("AVERAGE([-1 ,  12,  3,2])", 4)]
+        [TestCase("AVERAGE([1.4,1.4])", 1.4)]
         public void AverageFormula_SuccessTest(string input, double output)
         {
             var result = _formulaEngine.Evaluate(input);

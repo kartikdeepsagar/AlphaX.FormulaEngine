@@ -3,11 +3,11 @@ using AlphaX.Parserz;
 
 namespace AlphaX.FormulaEngine
 {
-    internal static class ParserFactory
+    public static class ParserFactory
     {
         public static IParser FormulaParser { get; set; }
 
-        public static void BuildParser(FormulaEngineSettings settings)
+        internal static void BuildParser(FormulaEngineSettings settings)
         {
             var emtpyStringResult = new StringResult(string.Empty);
             var whiteSpacesParser = Parser.WhiteSpace.Many().MapResult(x => emtpyStringResult);
@@ -51,7 +51,20 @@ namespace AlphaX.FormulaEngine
               .AndThen(whiteSpacesParser)
               .MapResult(x => x.Value[0]);
 
-            var baseArgumentParser = stringValueParser
+            var arrayCommaResult = new StringResult(",");
+            var arrayCommaParser = Parser.String(",")
+                .AndThen(whiteSpacesParser)
+                .MapResult(x => arrayCommaResult);
+
+            var arrayParser = Parser.String("[")
+                .AndThen(whiteSpacesParser)
+                .AndThen(stringValueParser.Or(numberParser).Or(booleanParser).Or(Parser.Lazy(() => FormulaParser)).ManySeptBy(arrayCommaParser))
+                .AndThen(Parser.String("]"))
+                .AndThen(whiteSpacesParser)
+                .MapResult(x => x.Value[2]);
+
+            var baseArgumentParser = arrayParser
+                .Or(stringValueParser)
                 .Or(numberParser)
                 .Or(booleanParser)
                 .Or(Parser.Lazy(() => FormulaParser));

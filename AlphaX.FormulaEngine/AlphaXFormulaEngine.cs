@@ -1,5 +1,6 @@
 ﻿using AlphaX.Parserz;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -68,10 +69,7 @@ namespace AlphaX.FormulaEngine
                 if (item.Type == ParserResultType.Array)
                 {
                     var argResult = Evaluate(item as ArrayResult);
-                    if(argResult is IEnumerable<object> enumerable)
-                        arguments.AddRange(enumerable);
-                    else
-                        arguments.Add(argResult);
+                    arguments.Add(argResult);
                 }
                 else if(item.Type == ParserResultType.Number || item.Type == ParserResultType.String || item.Type == FormulaParserResultType.Operator
                     || item.Type == ParserResultType.Boolean)
@@ -96,13 +94,43 @@ namespace AlphaX.FormulaEngine
                 }
             }
 
-            if (formula != null && (arguments.Count > formula.Info.MaxArgsCount || arguments.Count < formula.Info.MinArgsCount))
-                throw new EvaluationException($"Invalid number of arguments for '{formula.Name}' formula");
+            ValidateArguments(formula, arguments.ToArray());
 
             if (formula == null)
-                return arguments;
+                return arguments.ToArray();
 
-            return formula.Evaluate(arguments.ToArray());
+            return formula.Evaluate((object[])arguments[0]);
+        }
+
+        private void ValidateArguments(Formula formula, object[] arguments)
+        {
+            if (formula == null)
+                return;
+
+            arguments = (object[])arguments[0];
+            if (arguments.Length > formula.Info.MaxArgsCount || arguments.Length < formula.Info.MinArgsCount)
+            {         
+                throw new EvaluationException($"Invalid number of arguments for '{formula.Name}' formula");
+            }
+            else
+            {
+                for(int index = 0; index < formula.Info.MaxArgsCount; index++)
+                {
+                    var argumentData = formula.Info.Arguments[index];
+                    var argument = arguments[index];
+                    var isArray = argumentData.Type.IsArray;
+
+                    if (isArray && (argument.GetType() != typeof(object[])))
+                    {
+                        throw new EvaluationException($"Argument: {argumentData.Name}, Argument type doesn't match for '{formula.Name}' formula");
+                    }
+
+                    if(!isArray && argumentData.Type != typeof(object) && (argumentData.Type != argument.GetType()))
+                    {
+                        throw new EvaluationException($"Argument: {argumentData.Name}, Argument type doesn't match for '{formula.Name}' formula");
+                    }
+                }
+            }
         }
 
         public void AddFormula(Formula formula)

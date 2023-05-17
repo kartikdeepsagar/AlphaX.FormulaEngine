@@ -6,37 +6,32 @@ namespace AlphaX.FormulaEngine
 {
     public class FormulaInfo
     {
+        private List<FormulaArgument> _arguments;
+
         /// <summary>
         /// Gets the formula arguments.
         /// </summary>
-        public List<FormulaArgument> Arguments { get; }
+        public IReadOnlyList<FormulaArgument> Arguments => _arguments;
         public int MinArgsCount { get; private set; }
         public int MaxArgsCount { get; private set; }
 
         public FormulaInfo()
         {
-            Arguments = new List<FormulaArgument>();
+            _arguments = new List<FormulaArgument>();
             MinArgsCount = 0;
             MaxArgsCount = 0;
         }
 
         public void AddArgument(FormulaArgument argument)
         {
-            Arguments.Add(argument);
+            _arguments.Add(argument);
 
             if(argument.Required)
             {
                 MinArgsCount++;
             }
 
-            if(argument.IsArray)
-            {
-                MaxArgsCount = int.MaxValue;
-            }
-            else if(MaxArgsCount != int.MaxValue)
-            {
-                MaxArgsCount = Arguments.Count;
-            }
+            MaxArgsCount = _arguments.Count;
         }
     }
 }
