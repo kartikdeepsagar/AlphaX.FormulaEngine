@@ -49,14 +49,6 @@ namespace AlphaX.FormulaEngine
         }
     }
 
-    public class ConditionArgument : FormulaArgument
-    {
-        public ConditionArgument(string name, bool required) : base(name, typeof(Condition), required)
-        {
-
-        }
-    }
-
     public class BooleanArgument : FormulaArgument
     {
         public BooleanArgument(string name, bool required) : base(name, typeof(bool), required)

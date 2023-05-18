@@ -14,10 +14,8 @@ namespace AlphaX.FormulaEngine.Formulas
         {
             if (args.Length == 3)
             {
-                var condition = (Condition)args[0];
-                var result = Compare(condition);
-
-                if (result)
+                var condition = (bool)args[0];
+                if (condition)
                 {
                     return args[1];
                 }
@@ -28,44 +26,14 @@ namespace AlphaX.FormulaEngine.Formulas
             }
             else
             {
-                return string.Empty;
-            }
-        }
-
-        private bool Compare(Condition condition)
-        {
-            double.TryParse(condition.LeftOperand?.ToString(), out double operand1);
-            double.TryParse(condition.RightOperand?.ToString(), out double operand2);
-
-            switch (condition.Operator)
-            {
-                case "==":
-                    return Comparer.Equals(condition.LeftOperand, condition.RightOperand);
-
-                case "!=":
-                    return !Comparer.Equals(condition.LeftOperand, condition.RightOperand); ;
-
-                case "<":
-                    return operand1 < operand2;
-
-                case ">":
-                    return operand1 > operand2;
-
-                case "<=":
-                    return operand1 <= operand2;
-
-                case ">=":
-                    return operand1 >= operand2;
-
-                default:
-                    return false;
+                return false;
             }
         }
 
         protected override FormulaInfo GetFormulaInfo()
         {
             FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new ConditionArgument("condition", true));
+            info.AddArgument(new BooleanArgument("condition", true));
             info.AddArgument(new ObjectArgument("value1", true));
             info.AddArgument(new ObjectArgument("value2", true));
             return info;

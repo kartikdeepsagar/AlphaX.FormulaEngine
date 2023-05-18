@@ -6,7 +6,7 @@ namespace AlphaX.FormulaEngine
 {
     public static class ParserFactory
     {
-        public static IParser FormulaParser { get; set; }
+        public static IParser FormulaParser { get; private set; }
 
         internal static void BuildParser(IEngineSettings settings)
         {

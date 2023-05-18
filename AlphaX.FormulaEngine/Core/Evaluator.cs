@@ -1,5 +1,10 @@
-﻿using AlphaX.Parserz;
+﻿using AlphaX.FormulaEngine.Formulas;
+using AlphaX.Parserz;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace AlphaX.FormulaEngine
 {
@@ -62,16 +67,16 @@ namespace AlphaX.FormulaEngine
                         condition.RightOperand = Evaluate(new ArrayResult(rArray));
                     }
 
-                    arguments.Add(condition);
+                    arguments.Add(Compare(condition));
                 }
             }
 
             if (formula == null)
                 return arguments.ToArray();
 
-            ValidateAndResolveArguments(formula, arguments.ToArray());
-
-            return formula.Evaluate((object[])arguments[0]);
+            var parsedArguments = (object[])arguments[0];
+            ValidateAndResolveArguments(formula, parsedArguments);
+            return formula.Evaluate(parsedArguments);
         }
 
         private void ValidateAndResolveArguments(Formula formula, object[] arguments)
@@ -79,62 +84,124 @@ namespace AlphaX.FormulaEngine
             if (formula == null)
                 return;
 
-            arguments = (object[])arguments[0];
-            if (arguments.Length > formula.Info.MaxArgsCount || arguments.Length < formula.Info.MinArgsCount)
+            ValidateArgumentCount(formula.Info.MinArgsCount, formula.Info.MaxArgsCount, formula.Name, arguments);
+
+            for (int index = 0; index < formula.Info.MaxArgsCount; index++)
             {
-                throw new EvaluationException($"Invalid number of arguments for '{formula.Name}' formula");
+                var argument = formula.Info.Arguments[index];
+
+                if (index > arguments.Length - 1)
+                    break;
+
+                var argumentValue = arguments[index];
+
+                if (argumentValue is CustomName cName)
+                {
+                    arguments[index] = ValidateAndResolveCustomArgument(formula, argument, cName);
+                }
+                else if (argument.Type.IsArray)
+                {
+                    ValidateArrayArgument(formula.Name, argument, argumentValue);
+                }
+                else
+                {
+                    ValidateNonArrayArgument(formula.Name, argument, argumentValue);
+                }
+            }
+        }
+
+        private void ValidateArgumentCount(int minArgs, int maxArgs, string formulaName, object[] arguments)
+        {
+            if (arguments.Length > maxArgs || arguments.Length < minArgs)
+            {
+                throw new EvaluationException($"Invalid number of arguments for '{formulaName}' formula");
+            }
+        }
+
+        private object ValidateAndResolveCustomArgument(Formula formula, FormulaArgument argument, CustomName customName)
+        {
+            if (formula.RequireContext)
+            {
+                if (_engine.Context == null)
+                {
+                    throw new EvaluationException("Formula require context but no context found.");
+                }
+
+                var resolvedValue = _engine.Context.Resolve(customName.Value);
+                ValidateNonArrayArgument(formula.Name, argument, resolvedValue);
+                return resolvedValue;
             }
             else
             {
-                for (int index = 0; index < formula.Info.MaxArgsCount; index++)
+                return customName.Value;
+            }
+        }
+
+        private void ValidateArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
+        {
+            if (argumentValue == null)
+            {
+                return;
+            }
+
+            if (argumentValue.GetType() != argument.Type)
+            {
+                throw new EvaluationException($"Argument ({argument.Name}) type doesn't match with '{formulaName}' formula. Expected array type.");
+            }
+        }
+
+        private void ValidateNonArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
+        {
+            if (argumentValue == null)
+            {
+                return;
+            }
+
+            if (argument.Type == typeof(object))
+            {
+                if(!MatchesSupportedTypes(argumentValue.GetType()))
                 {
-                    var argumentData = formula.Info.Arguments[index];
-
-                    if (index > arguments.Length - 1)
-                        break;
-
-                    var argument = arguments[index];
-
-                    if (argument is CustomName cName)
-                    {
-                        if (formula.RequireContext)
-                        {
-                            if (_engine.Context == null)
-                            {
-                                throw new EvaluationException("Formula require context but no context found.");
-                            }
-
-                            var resolvedValue = _engine.Context.Resolve(cName.Value);
-
-                            if (resolvedValue != null && resolvedValue.GetType() != argumentData.Type)
-                            {
-                                throw new EvaluationException($"Argument ({argumentData.Name}) type doesn't match with '{formula.Name}' formula");
-                            }
-                            else
-                            {
-                                arguments[index] = resolvedValue;
-                            }
-                        }
-                        else
-                        {
-                            arguments[index] = cName.Value;
-                        }
-                    }
-                    else
-                    {
-                        var isArray = argumentData.Type.IsArray;
-
-                        if (isArray && (argument.GetType() != typeof(object[])))
-                        {
-                            throw new EvaluationException($"Argument ({argumentData.Name}) type doesn't match with '{formula.Name}' formula");
-                        }
-
-                        if (!isArray && argumentData.Type != typeof(object) && (argumentData.Type != argument.GetType()))
-                        {
-                            throw new EvaluationException($"Argument ({argumentData.Name}) type doesn't match with '{formula.Name}' formula");
-                        }
-                    }
+                    throw new EvaluationException($"Argument ({argument.Name}) type doesn't match with '{formulaName}' formula");
                 }
+            }
+            else if (argument.Type != argumentValue.GetType())
+            {
+                throw new EvaluationException($"Argument ({argument.Name}) type doesn't match with '{formulaName}' formula");
+            }
+        }
+
+        private bool MatchesSupportedTypes(Type type)
+        {
+            return type == typeof(string) || type == typeof(double) || type == typeof(bool);
+        }
+
+        private bool Compare(Condition condition)
+        {
+            double.TryParse(condition.LeftOperand?.ToString(), out double operand1);
+            double.TryParse(condition.RightOperand?.ToString(), out double operand2);
+
+            switch (condition.Operator)
+            {
+                case "==":
+                    return Comparer.Equals(condition.LeftOperand, condition.RightOperand);
+
+                case "!=":
+                    return !Comparer.Equals(condition.LeftOperand, condition.RightOperand); ;
+
+                case "<":
+                    return operand1 < operand2;
+
+                case ">":
+                    return operand1 > operand2;
+
+                case "<=":
+                    return operand1 <= operand2;
+
+                case ">=":
+                    return operand1 >= operand2;
+
+                default:
+                    return false;
             }
         }
     }
