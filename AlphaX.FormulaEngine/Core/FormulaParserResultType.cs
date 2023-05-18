@@ -12,13 +12,13 @@ namespace AlphaX.FormulaEngine
         public static ParserResultType CustomName = new ParserResultType("CustomName");
     }
 
-    public struct Condition
+    internal struct Condition
     {
-        public object LeftOperand { get; set; }
-        public string Operator { get; set; }
-        public object RightOperand { get; set; }
+        public IParserResult LeftOperand { get; set; }
+        public IParserResult Operator { get; set; }
+        public IParserResult RightOperand { get; set; }
 
-        public Condition(object leftOperand, string @operator, object rightOperand)
+        public Condition(IParserResult leftOperand, IParserResult @operator, IParserResult rightOperand)
         {
             LeftOperand = leftOperand;
             Operator = @operator;
@@ -26,7 +26,7 @@ namespace AlphaX.FormulaEngine
         }
     }
 
-    public struct CustomName
+    internal struct CustomName
     {
         public string Value { get; set; }
 

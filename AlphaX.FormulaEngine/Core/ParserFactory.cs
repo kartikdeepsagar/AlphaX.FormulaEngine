@@ -4,9 +4,10 @@ using AlphaX.Parserz;
 
 namespace AlphaX.FormulaEngine
 {
-    public static class ParserFactory
+    internal static class ParserFactory
     {
         public static IParser FormulaParser { get; private set; }
+        public static IParser ExpressionParser { get; private set; }
 
         internal static void BuildParser(IEngineSettings settings)
         {
@@ -55,7 +56,7 @@ namespace AlphaX.FormulaEngine
 
             var arrayParser = Parser.String("[")
                 .AndThen(whiteSpacesParser)
-                .AndThen(stringValueParser.Or(numberParser).Or(booleanParser).Or(Parser.Lazy(() => FormulaParser)).ManySeptBy(arrayCommaParser))
+                .AndThen(customNameParser.Or(stringValueParser).Or(numberParser).Or(booleanParser).Or(Parser.Lazy(() => FormulaParser)).ManySeptBy(arrayCommaParser))
                 .AndThen(Parser.String("]"))
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[2]);
@@ -66,6 +67,8 @@ namespace AlphaX.FormulaEngine
               .Or(Parser.String(">="))
               .Or(Parser.String("<"))
               .Or(Parser.String(">"))
+              .Or(Parser.String("&&"))
+              .Or(Parser.String("||"))
               .AndThen(whiteSpacesParser)
               .MapResult(x => x.Value[0]);
 
@@ -101,14 +104,14 @@ namespace AlphaX.FormulaEngine
                             return baseArgumentParser.MapResult(rightOperandResult =>
                             {
                                  return new ConditionResult(new Condition(                                  
-                                      leftOperandResult.Value,
-                                      operatorResult.Value?.ToString(),
-                                      rightOperandResult.Value
+                                      leftOperandResult,
+                                      operatorResult,
+                                      rightOperandResult
                                  ));
                             }).MapError(x => new ParserError(x.Index, "Invalid logical expression"));
                         }
                     });
-                });
+                }).MapError(x => new ParserError(x.Index, "Invalid argument found in expression"));
 
             var commaResult = new FormulaArgumentSeperatorResult(settings.ArgumentsSeparatorSymbol);
             var commaParser = Parser.String(settings.ArgumentsSeparatorSymbol)
@@ -118,7 +121,10 @@ namespace AlphaX.FormulaEngine
             FormulaParser = formulaNameParser
                 .AndThen(openBracketParser)
                 .AndThen(formulaArgumentParser.ManySeptBy(commaParser))
-                .AndThen(closeBracketParser);
+                .AndThen(closeBracketParser)
+                .MapError(x => new ParserError(x.Index, "Invalid formula expression"));
+
+            ExpressionParser = formulaArgumentParser;
         }
     }
 }

@@ -25,12 +25,12 @@ namespace AlphaX.FormulaEngine
         {
             try
             {
-                var parserState = ParserFactory.FormulaParser.Run(input);
+                var parserState = ParserFactory.ExpressionParser.Run(input);
 
                 if (parserState.IsError)
                     return new EvaluationResult(parserState.Error.Message);
 
-                var result = _evaluator.Evaluate(parserState.Result as ArrayResult);
+                object result = _evaluator.Evaluate(parserState.Result);
                 return new EvaluationResult(result);
             }
             catch(EvaluationException ex)

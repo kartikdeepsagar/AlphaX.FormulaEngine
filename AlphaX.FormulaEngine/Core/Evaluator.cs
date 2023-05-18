@@ -20,66 +20,68 @@ namespace AlphaX.FormulaEngine
         /// <summary>
         /// Evaluates the result from AST.
         /// </summary>
-        /// <param name="nodes"></param>
+        /// <param name="result"></param>
         /// <returns></returns>
-        public object Evaluate(ArrayResult nodes)
+        public object Evaluate(IParserResult result)
         {
-            List<object> arguments = new List<object>();
-
-            Formula formula = null;
-
-            for (int index = 0; index < nodes.Value.Length; index++)
+            if(result is ArrayResult nodes)
             {
-                var item = nodes.Value[index];
+                List<object> arguments = new List<object>();
 
-                if (item.Type == FormulaParserResultType.FormulaName)
-                {
-                    var formulaName = item.Value.ToString();
-                    if (!_engine.FormulaStore.Contains(formulaName))
-                        throw new EvaluationException($"Invalid formula '{formulaName}'");
+                Formula formula = null;
 
-                    formula = _engine.FormulaStore.Get(formulaName);
-                }
-                else if (item.Type == ParserResultType.Array)
+                for (int index = 0; index < nodes.Value.Length; index++)
                 {
-                    var argResult = Evaluate(item as ArrayResult);
-                    arguments.Add(argResult);
-                }
-                else if (item.Type == ParserResultType.Number || 
-                    item.Type == ParserResultType.String || 
-                    item.Type == FormulaParserResultType.Operator || 
-                    item.Type == ParserResultType.Boolean ||
-                    item.Type == FormulaParserResultType.CustomName)
-                {
-                    arguments.Add(item.Value);
-                }
-                else if (item.Type == FormulaParserResultType.Condition)
-                {
-                    var condition = (Condition)item.Value;
+                    var item = nodes.Value[index];
 
-                    if (condition.LeftOperand is IParserResult[] lArray)
+                    if (item.Type == FormulaParserResultType.FormulaName)
                     {
-                        condition.LeftOperand = Evaluate(new ArrayResult(lArray));
-                    }
+                        var formulaName = item.Value.ToString();
+                        if (!_engine.FormulaStore.Contains(formulaName))
+                            throw new EvaluationException($"Invalid formula '{formulaName}'");
 
-                    if (condition.RightOperand is IParserResult[] rArray)
+                        formula = _engine.FormulaStore.Get(formulaName);
+                        continue;
+                    }
+                    
+                    if (item.Type == ParserResultType.Array 
+                        || item.Type == FormulaParserResultType.CustomName 
+                        || item.Type == FormulaParserResultType.Condition)
                     {
-                        condition.RightOperand = Evaluate(new ArrayResult(rArray));
+                        arguments.Add(Evaluate(item));
                     }
-
-                    arguments.Add(Compare(condition));
+                    else if (item.Type == ParserResultType.Number ||
+                        item.Type == ParserResultType.String ||
+                        item.Type == FormulaParserResultType.Operator ||
+                        item.Type == ParserResultType.Boolean)
+                    {
+                        arguments.Add(item.Value);
+                    }
                 }
+
+                if (formula == null)
+                    return arguments.ToArray();
+
+                var parsedArguments = (object[])arguments[0];
+                ValidateArguments(formula, parsedArguments);
+                return formula.Evaluate(parsedArguments);
             }
-
-            if (formula == null)
-                return arguments.ToArray();
-
-            var parsedArguments = (object[])arguments[0];
-            ValidateAndResolveArguments(formula, parsedArguments);
-            return formula.Evaluate(parsedArguments);
+            else if (result is ConditionResult conditionResult)
+            {
+                return ResolveCondition(conditionResult.Value);
+            }
+            else if (result is CustomNameResult customNameResult)
+            {
+                return ResolveCustomName(customNameResult.Value);
+            }
+            else
+            {
+                return result.Value;
+            }
         }
 
-        private void ValidateAndResolveArguments(Formula formula, object[] arguments)
+        #region Argument Validation
+        private void ValidateArguments(Formula formula, object[] arguments)
         {
             if (formula == null)
                 return;
@@ -95,11 +97,7 @@ namespace AlphaX.FormulaEngine
 
                 var argumentValue = arguments[index];
 
-                if (argumentValue is CustomName cName)
-                {
-                    arguments[index] = ValidateAndResolveCustomArgument(formula, argument, cName);
-                }
-                else if (argument.Type.IsArray)
+                if (argument.Type.IsArray)
                 {
                     ValidateArrayArgument(formula.Name, argument, argumentValue);
                 }
@@ -115,25 +113,6 @@ namespace AlphaX.FormulaEngine
             if (arguments.Length > maxArgs || arguments.Length < minArgs)
             {
                 throw new EvaluationException($"Invalid number of arguments for '{formulaName}' formula");
-            }
-        }
-
-        private object ValidateAndResolveCustomArgument(Formula formula, FormulaArgument argument, CustomName customName)
-        {
-            if (formula.RequireContext)
-            {
-                if (_engine.Context == null)
-                {
-                    throw new EvaluationException("Formula require context but no context found.");
-                }
-
-                var resolvedValue = _engine.Context.Resolve(customName.Value);
-                ValidateNonArrayArgument(formula.Name, argument, resolvedValue);
-                return resolvedValue;
-            }
-            else
-            {
-                return customName.Value;
             }
         }
 
@@ -172,36 +151,82 @@ namespace AlphaX.FormulaEngine
 
         private bool MatchesSupportedTypes(Type type)
         {
-            return type == typeof(string) || type == typeof(double) || type == typeof(bool);
+            return type == typeof(string) || type == typeof(double) || type == typeof(int) || type == typeof(bool);
+        }
+        #endregion
+
+        #region Argument resolving
+        private bool ResolveCondition(Condition condition)
+        {
+            var left = Evaluate(condition.LeftOperand);
+            var @operator = Evaluate(condition.Operator);
+            var right = Evaluate(condition.RightOperand);
+            return Compare(left, @operator?.ToString(), right);
         }
 
-        private bool Compare(Condition condition)
+        public object ResolveCustomName(CustomName customName)
         {
-            double.TryParse(condition.LeftOperand?.ToString(), out double operand1);
-            double.TryParse(condition.RightOperand?.ToString(), out double operand2);
-
-            switch (condition.Operator)
+            if (_engine.Context == null)
             {
-                case "==":
-                    return Comparer.Equals(condition.LeftOperand, condition.RightOperand);
+                throw new EvaluationException("Formula require context but no context found.");
+            }
 
-                case "!=":
-                    return !Comparer.Equals(condition.LeftOperand, condition.RightOperand); ;
+            var resolvedValue = _engine.Context.Resolve(customName.Value);
 
-                case "<":
-                    return operand1 < operand2;
+            if(resolvedValue is int)
+            {
+                resolvedValue = Convert.ToDouble(resolvedValue);
+            }
 
-                case ">":
-                    return operand1 > operand2;
+            return resolvedValue;
+        }
+        #endregion
 
-                case "<=":
-                    return operand1 <= operand2;
+        private bool Compare(object left, string @operator, object right)
+        {
+            try
+            {
+                if (@operator == "==")
+                    return Comparer.Equals(left, right);
 
-                case ">=":
-                    return operand1 >= operand2;
+                if (@operator == "!=")
+                    return !Comparer.Equals(left, right);
 
-                default:
-                    return false;
+                if (left is bool bool1 && right is bool bool2)
+                {
+                    switch (@operator)
+                    {
+                        case "&&":
+                            return bool1 && bool2;
+
+                        case "||":
+                            return bool1 || bool2;
+                    }
+                }
+
+                if (left is double num1 && right is double num2)
+                {
+                    switch (@operator)
+                    {
+                        case "<":
+                            return num1 < num2;
+
+                        case ">":
+                            return num1 > num2;
+
+                        case "<=":
+                            return num1 <= num2;
+
+                        case ">=":
+                            return num1 >= num2;
+                    }
+                }
+
+                return false;
+            }
+            catch
+            {
+                throw new EvaluationException($"Invalid operator used with operands. {left} {@operator} {right}");
             }
         }
     }

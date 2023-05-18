@@ -12,14 +12,9 @@ namespace AlphaX.FormulaEngine
         /// Gets the formula information.
         /// </summary>
         public FormulaInfo Info { get; }
-        /// <summary>
-        /// Gets if the formula require engine context for resolving arguments.
-        /// </summary>
-        public bool RequireContext { get; }
 
-        public Formula(string name, bool requireContext = false)
+        public Formula(string name)
         {
-            RequireContext = requireContext;
             Name = name;
             Info = GetFormulaInfo();
 
