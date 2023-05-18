@@ -81,21 +81,11 @@ namespace AlphaX.FormulaEngine
 
             var formulaArgumentParser = baseArgumentParser.Next(leftOperandResult =>
                 {
-                    return logicalOperatorParsers.Many(0, 1)
-                    .MapResult(result =>
-                    {
-                        if (result.Value.Length > 0)
-                        {
-                            return new OperatorResult(result.Value[0].Value?.ToString());
-                        }
-                        else
-                        {
-                            return leftOperandResult;
-                        }
-                    })
+                    ConditionResult conditionResult = null;
+                    return logicalOperatorParsers
                     .Next(operatorResult =>
                     {
-                        if (operatorResult.Type != FormulaParserResultType.Operator)
+                        if (operatorResult.Type != ParserResultType.String)
                         {
                             return Parser.FromResult(leftOperandResult);
                         }
@@ -103,13 +93,33 @@ namespace AlphaX.FormulaEngine
                         {
                             return baseArgumentParser.MapResult(rightOperandResult =>
                             {
-                                 return new ConditionResult(new Condition(                                  
+                                if(conditionResult == null)
+                                {
+                                    conditionResult = new ConditionResult(new Condition(
                                       leftOperandResult,
                                       operatorResult,
-                                      rightOperandResult
-                                 ));
+                                      rightOperandResult));
+                                }
+                                else
+                                {
+                                    conditionResult = new ConditionResult(new Condition()
+                                    {
+                                        LeftOperand = conditionResult,
+                                        Operator = operatorResult,
+                                        RightOperand = rightOperandResult
+                                    });
+                                }
+                                return conditionResult;
                             }).MapError(x => new ParserError(x.Index, "Invalid logical expression"));
                         }
+                    })
+                    .Many()
+                    .MapResult(x =>
+                    {
+                        if (x.Value.Length == 0)
+                            return leftOperandResult;
+
+                        return conditionResult;
                     });
                 }).MapError(x => new ParserError(x.Index, "Invalid argument found in expression"));
 

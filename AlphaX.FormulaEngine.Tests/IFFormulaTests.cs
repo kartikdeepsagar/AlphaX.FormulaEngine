@@ -18,6 +18,9 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("IF(1 != 1, true, false)", false)]
         [TestCase("IF(5 <= 6, \"true\", \"false\")", "true")]
         [TestCase("IF(\"test\" == \"test\", \"true\", \"false\")", "true")]
+        [TestCase("IF(true && true, true, false)", true)]
+        [TestCase("IF(true && false, true, false)", false)]
+        [TestCase("IF(SUM([1,2]) == SUM([2,1]), true, false)", true)]
         public void IFFormula_SuccessTest(string input, object output)
         {
             var result = _formulaEngine.Evaluate(input);

@@ -7,7 +7,6 @@ namespace AlphaX.FormulaEngine
         public static ParserResultType FormulaName = new ParserResultType("FormulaName");
         public static ParserResultType FormulaBracket = new ParserResultType("FormulaBracket");
         public static ParserResultType FormulaArgumentSeperator = new ParserResultType("FormulaArgumentSeperator");
-        public static ParserResultType Operator = new ParserResultType("Operator");
         public static ParserResultType Condition = new ParserResultType("Condition");
         public static ParserResultType CustomName = new ParserResultType("CustomName");
     }
@@ -47,14 +46,6 @@ namespace AlphaX.FormulaEngine
     internal class CustomNameResult : ParserResult<CustomName>
     {
         public CustomNameResult(CustomName value) : base(value, FormulaParserResultType.CustomName)
-        {
-
-        }
-    }
-
-    internal class OperatorResult : ParserResult<string>
-    {
-        public OperatorResult(string value) : base(value, FormulaParserResultType.Operator)
         {
 
         }

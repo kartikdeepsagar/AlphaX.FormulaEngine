@@ -52,7 +52,6 @@ namespace AlphaX.FormulaEngine
                     }
                     else if (item.Type == ParserResultType.Number ||
                         item.Type == ParserResultType.String ||
-                        item.Type == FormulaParserResultType.Operator ||
                         item.Type == ParserResultType.Boolean)
                     {
                         arguments.Add(item.Value);
