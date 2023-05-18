@@ -5,7 +5,7 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>Icon.png</PackageIcon>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <Description>A strong and fast library to parse and evaluate formulas. It also supports custom formulas. This library is built using 'AlphaX.Parserz' library.
 
 Please provide your feedback or suggestions here - https://docs.google.com/forms/d/e/1FAIpQLSfKVz5KlycuTM9j7ZQApk0_vK7OEyGK-wCUUDSfPocHWq9MFg/viewform?usp=sf_link</Description>
@@ -14,8 +14,9 @@ Please provide your feedback or suggestions here - https://docs.google.com/forms
     <SignAssembly>False</SignAssembly>
     <Authors>AlphaX</Authors>
     <PackageTags>alpha;parse;parser;engines;formula;alphax.formula;formula engine; alphax.formulaengine;</PackageTags>
-    <AssemblyVersion>2.0.1</AssemblyVersion>
-    <FileVersion>2.0.1</FileVersion>
+    <AssemblyVersion>2.0.2</AssemblyVersion>
+    <FileVersion>2.0.2</FileVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -27,6 +28,10 @@ Please provide your feedback or suggestions here - https://docs.google.com/forms
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
     <None Include="Icon.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>

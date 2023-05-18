@@ -3,6 +3,8 @@
 
 A strong and fast library to parse and evaluate formulas. It also supports custom formulas. This library is built using '[AlphaX.Parserz](https://www.nuget.org/packages/AlphaX.Parserz)' library.
 
+Feedback is very much appreciated : https://forms.gle/dfv8E8zpC2qPJS7i7
+
 # Using AlphaXFormulaEngine
 
 For evaluating formulas using AlphaXFormulaEngine, you can simply initialize the engine and start using its Evaluate method:
@@ -83,7 +85,7 @@ The above code defines that our formula:
 4. Now our formula is ready and the only thing left is to integrate it with the engine by using AlphaXFormulaEngine's **AddFormula** method as follows:
 ```c#
 AlphaX.FormulaEngine.AlphaXFormulaEngine engine = new AlphaX.FormulaEngine.AlphaXFormulaEngine();
-engine.AddFormula(new MyFormula());
+engine.FormulaStore.Add(new MyFormula());
 AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("MyFormula(4,3)");
 Console.WriteLine(result.Value); // 64
 ```
@@ -103,7 +105,7 @@ AlphaX.FormulaEngine.AlphaXFormulaEngine engine = new AlphaX.FormulaEngine.Alpha
 engine.Settings.ArgumentsSeparatorSymbol = "|";
 engine.Settings.OpenBracketSymbol = "[";
 engine.Settings.CloseBracketSymbol = "]";
-engine.Settings.Update();
+engine.Settings.Save();
 
 engine.AddFormula(new MyFormula());
 AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("MyFormula[4|3]");
@@ -118,5 +120,3 @@ Console.WriteLine(result.Value); // 256
 ```
 
 That's all of it :-)
-
-Feedback is very much appreciated : https://forms.gle/dfv8E8zpC2qPJS7i7
