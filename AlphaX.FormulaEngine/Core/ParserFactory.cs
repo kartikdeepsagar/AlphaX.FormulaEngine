@@ -32,7 +32,7 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => new FormulaNameResult(x.Value[0].Value.ToString()));
 
-            var customNameParser = Parser.String("$")
+            var customNameParser = Parser.String(Tokens.Custom)
                 .AndThen(Parser.AnyLetterOrDigit().Many().MapResult(x => x.ToStringResult()))
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => new CustomNameResult(new CustomName(x.Value[1].Value?.ToString())));
@@ -49,26 +49,26 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            var arrayCommaResult = new StringResult(",");
-            var arrayCommaParser = Parser.String(",")
+            var arrayCommaResult = new StringResult(Tokens.Comma);
+            var arrayCommaParser = Parser.String(Tokens.Comma)
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => arrayCommaResult);
 
-            var arrayParser = Parser.String("[")
+            var arrayParser = Parser.String(Tokens.OpenSquareBracket)
                 .AndThen(whiteSpacesParser)
                 .AndThen(customNameParser.Or(stringValueParser).Or(numberParser).Or(booleanParser).Or(Parser.Lazy(() => FormulaParser)).ManySeptBy(arrayCommaParser))
-                .AndThen(Parser.String("]"))
+                .AndThen(Parser.String(Tokens.ClosedSquareBracket))
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[2]);
 
-            var logicalOperatorParsers = Parser.String("==")
-              .Or(Parser.String("!="))
-              .Or(Parser.String("<="))
-              .Or(Parser.String(">="))
-              .Or(Parser.String("<"))
-              .Or(Parser.String(">"))
-              .Or(Parser.String("&&"))
-              .Or(Parser.String("||"))
+            var logicalOperatorParsers = Parser.String(Tokens.EqualsTo)
+              .Or(Parser.String(Tokens.NotEquals))
+              .Or(Parser.String(Tokens.LessThanEqualsTo))
+              .Or(Parser.String(Tokens.GreaterThanEqualsTo))
+              .Or(Parser.String(Tokens.LessThan))
+              .Or(Parser.String(Tokens.GreaterThan))
+              .Or(Parser.String(Tokens.AND))
+              .Or(Parser.String(Tokens.OR))
               .AndThen(whiteSpacesParser)
               .MapResult(x => x.Value[0]);
 

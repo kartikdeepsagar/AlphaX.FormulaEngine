@@ -1,16 +1,17 @@
 ﻿namespace AlphaX.FormulaEngine.Formulas
 {
-    internal class LowerFormula : Formula
+    internal abstract class StringFormula : Formula
     {
-        public LowerFormula() : base("LOWER") { }
+        protected StringFormula(string name) : base(name)
+        {
+        }
 
         public override object Evaluate(params object[] args)
         {
-            if (args.Length > 0)
-                return args[0].ToString().ToLowerInvariant();
-            else
-                return string.Empty;
+            return EvaluateString(args[0].ToString());
         }
+
+        protected abstract object EvaluateString(string value);
 
         protected override FormulaInfo GetFormulaInfo()
         {

@@ -172,7 +172,7 @@ namespace AlphaX.FormulaEngine
 
             var resolvedValue = _engine.Context.Resolve(customName.Value);
 
-            if(resolvedValue is int)
+            if(resolvedValue is int || resolvedValue is byte)
             {
                 resolvedValue = Convert.ToDouble(resolvedValue);
             }
@@ -181,24 +181,24 @@ namespace AlphaX.FormulaEngine
         }
         #endregion
 
-        private bool Compare(object left, string @operator, object right)
+        public static bool Compare(object left, string @operator, object right)
         {
             try
             {
-                if (@operator == "==")
+                if (@operator == Tokens.EqualsTo)
                     return Comparer.Equals(left, right);
 
-                if (@operator == "!=")
+                if (@operator == Tokens.NotEquals)
                     return !Comparer.Equals(left, right);
 
                 if (left is bool bool1 && right is bool bool2)
                 {
                     switch (@operator)
                     {
-                        case "&&":
+                        case Tokens.AND:
                             return bool1 && bool2;
 
-                        case "||":
+                        case Tokens.OR:
                             return bool1 || bool2;
                     }
                 }
@@ -207,21 +207,39 @@ namespace AlphaX.FormulaEngine
                 {
                     switch (@operator)
                     {
-                        case "<":
+                        case Tokens.LessThan:
                             return num1 < num2;
 
-                        case ">":
+                        case Tokens.GreaterThan:
                             return num1 > num2;
 
-                        case "<=":
+                        case Tokens.LessThanEqualsTo:
                             return num1 <= num2;
 
-                        case ">=":
+                        case Tokens.GreaterThanEqualsTo:
                             return num1 >= num2;
                     }
                 }
 
-                return false;
+                if (left is DateTime date1 && right is DateTime date2)
+                {
+                    switch (@operator)
+                    {
+                        case Tokens.LessThan:
+                            return date1 < date2;
+
+                        case Tokens.GreaterThan:
+                            return date1 > date2;
+
+                        case Tokens.LessThanEqualsTo:
+                            return date1 <= date2;
+
+                        case Tokens.GreaterThanEqualsTo:
+                            return date1 >= date2;
+                    }
+                }
+
+                throw new Exception();
             }
             catch
             {

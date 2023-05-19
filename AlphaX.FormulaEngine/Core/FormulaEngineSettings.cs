@@ -11,9 +11,9 @@ namespace AlphaX.FormulaEngine
 
         public FormulaEngineSettings()
         {
-            CloseBracketSymbol = ")";
-            OpenBracketSymbol = "(";
-            ArgumentsSeparatorSymbol = ",";
+            CloseBracketSymbol = Tokens.ClosedBracket;
+            OpenBracketSymbol = Tokens.OpenBracket;
+            ArgumentsSeparatorSymbol = Tokens.Comma;
             DoubleQuotedStrings = true;
             Save();
         }

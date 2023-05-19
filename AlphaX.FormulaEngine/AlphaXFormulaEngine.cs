@@ -45,14 +45,39 @@ namespace AlphaX.FormulaEngine
 
         private void LoadDefaultFormulas()
         {
+            // Operators
+            FormulaStore.Add(new EqualsFormula());
+            FormulaStore.Add(new LessThanFormula());
+            FormulaStore.Add(new LessThanEqualsFormula());
+            FormulaStore.Add(new GreaterThanFormula());
+            FormulaStore.Add(new GreaterThanEqualsFormula());
+            FormulaStore.Add(new AndFormula());
+            FormulaStore.Add(new OrFormula());
+            FormulaStore.Add(new NotFormula());
+
+            // Arithmetic
             FormulaStore.Add(new SumFormula());
             FormulaStore.Add(new AverageFormula());
+
+            // Array
+            FormulaStore.Add(new ArrayContainsFormula());
+            FormulaStore.Add(new ArrayIncludesFormula());
+
+            // String
             FormulaStore.Add(new LowerFormula());
             FormulaStore.Add(new UpperFormula());
             FormulaStore.Add(new TextSplitFormula());
-            FormulaStore.Add(new TodayFormula());
             FormulaStore.Add(new ConcatFormula());
+            FormulaStore.Add(new LengthFormula());
+            FormulaStore.Add(new ContainsFormula());
+            FormulaStore.Add(new StartsWithFormula());
+            FormulaStore.Add(new EndsWithFormula());
+
+            // DateTime
+            FormulaStore.Add(new TodayFormula());
             FormulaStore.Add(new NowFormula());
+
+            // Logical
             FormulaStore.Add(new IFFormula());
         }
     }

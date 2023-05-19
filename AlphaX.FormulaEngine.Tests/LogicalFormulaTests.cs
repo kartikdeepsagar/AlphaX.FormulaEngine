@@ -1,8 +1,13 @@
-﻿using NUnit.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using NUnit.Framework;
 
 namespace AlphaX.FormulaEngine.Tests
 {
-    public class ConditionTests
+    public class LogicalFormulaTests
     {
         private IFormulaEngine _formulaEngine;
 
@@ -12,6 +17,7 @@ namespace AlphaX.FormulaEngine.Tests
             _formulaEngine = new AlphaXFormulaEngine();
         }
 
+        #region Condition Tests
         [TestCase("1 < 2", true)]
         [TestCase("1 <= 2", true)]
         [TestCase("1.23545 <= 2.24555", true)]
@@ -62,6 +68,33 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("!==1")]
         [TestCase("<=2")]
         public void Condition_FailureTest(string input)
+        {
+            var result = _formulaEngine.Evaluate(input);
+            Assert.IsNotNull(result.Error);
+        }
+        #endregion
+
+        [TestCase("IF(1 > 2, true, false)", false)]
+        [TestCase("IF(1 == 1, true, false)", true)]
+        [TestCase("IF(UPPER(UPPER(\"GraPecity\")) == UPPER(\"Grapecity\"), true, false)", true)]
+        [TestCase("IF(1 != 1, true, false)", false)]
+        [TestCase("IF(5 <= 6, \"true\", \"false\")", "true")]
+        [TestCase("IF(\"test\" == \"test\", \"true\", \"false\")", "true")]
+        [TestCase("IF(true && true, true, false)", true)]
+        [TestCase("IF(true && false, true, false)", false)]
+        [TestCase("IF(SUM([1,2]) == SUM([2,1]), true, false)", true)]
+        public void IFFormula_SuccessTest(string input, object output)
+        {
+            var result = _formulaEngine.Evaluate(input);
+            Assert.That(result.Value, Is.EqualTo(output));
+        }
+
+        [TestCase("IF(1s > 2, true, false)", false)]
+        [TestCase("IF(1s == \"sdsd\", true, false)", false)]
+        [TestCase("IF(1 + 1, true, false)", true)]
+        [TestCase("IF(5 << 6, \"true\", \"false\")", "sad")]
+        [TestCase("IF(\"test\" sd \"test\", \"true\", \"false\")", "asd")]
+        public void IFFormula_FailureTest(string input, object output)
         {
             var result = _formulaEngine.Evaluate(input);
             Assert.IsNotNull(result.Error);
