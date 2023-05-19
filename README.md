@@ -3,6 +3,8 @@
 
 A strong and fast library to parse and evaluate formulas. It also supports custom formulas. This library is built using '[AlphaX.Parserz](https://www.nuget.org/packages/AlphaX.Parserz)' library.
 
+GitHub Repo : https://github.com/kartikdeepsagar/AlphaX.FormulaEngine
+
 Feedback is very much appreciated : https://forms.gle/dfv8E8zpC2qPJS7i7
 
 # Using AlphaXFormulaEngine
@@ -16,14 +18,37 @@ Console.WriteLine(result.Value); // 21.2099
 
 AlphaXFormulaEngine comes with a limited number (not many) of inbuilt formulas i.e. 
 
+#### Arithmetic Formulas
 - SUM - Returns sum of provided values. For example: SUM([1,2,4]) // 7
 - AVERAGE - Returns average of provided values. For example: AVERAGE([3,2,4]) // 3
+
+#### String Formulas
 - LOWER - Returns lower cased string. For example: LOWER("TESTSTRING") // teststring
 - UPPER - Returns upper cased string. For example: UPPER("teststring") // TESTSTRING
 - TEXTSPLIT - Returns splitted string using a seperator. For example: TEXTSPLIT(".", "John.Doe") // John  Doe
-- TODAY - Returns system date. For example: TODAY() // 28-04-2023
 - CONCAT - Joins multiple strings into one string: For example: CONCAT("Test","String","1") // TestString1
+- LENGTH - Gets the length of a string. For example: LENGTH("AlphaX")  // 6
+- CONTAINS - Checks if a string contains another string. For example: CONTAINS("AlphaX", "pha")  // true
+- STARTSWITH - Checks if a string starts with the provided string. Accepts third (optional) parameter as boolean to match case. Default = false. For example: STARTSWITH("AlphaX", "Al", true)  // true
+- ENDSWITH - Checks if a string starts with the provided string. Accepts third (optional) parameter as boolean to match case. Default = false. For example: ENDSWITH("AlphaX", "Al")  // false
+
+#### DateTime Formulas
+- TODAY - Returns system date. For example: TODAY() // 28-04-2023
 - NOW -  Returns system date time // 28-04-2023 10:52:53 PM
+
+#### Logical Formulas
+- EQUALS - Checks if two values/expressions are equal. For example: EQUALS(true, 1 > 3)  // false
+- GREATERTHAN - Checks if one value/expressions is greater than other. For example: GREATERTHAN(5,2)  // true
+- GREATERTHANEQUALS - Checks if one value/expressions is greater than or equal to other. For example: GREATERTHANEQUALS(5,2)  // true
+- LESSTHAN - Checks if one value/expressions is less than other. For example: LESSTHAN(5,2)  // false
+- LESSTHANEQUALS - Checks if one value/expressions is less than or equal to other. For example: LESSTHANEQUALS(5,2)  // false
+- NOT - Inverse a boolean value/expression. For example: NOT(1 == 1)  // false
+- AND - Performs AND (&&) operation between 2 boolean values/expressions. For example: AND(true, 1 != 1)  // false
+- OR - Performs OR (||) operation between 2 boolean values/expressions. For example: OR(true, 1 != 1)  // true
+
+#### Array Formulas
+- ARRAYCONTAINS - Checks if array contains a value. For example: ARRAYCONTAINS([1,2,3], 2)  // true
+- ARRAYINCLUDES - Checks if array includes all values. For example: ARRAYINCLUDES([1,2,3,4], [3,4])  // true
 
 > **Note** : More formulas will be added in future updates.
 
