@@ -5,12 +5,12 @@
         public DefaultParseOrder()
         {
             Reset();
-            Add(ParseMode.Array);
-            Add(ParseMode.CustomName);
-            Add(ParseMode.String);
-            Add(ParseMode.Number);
-            Add(ParseMode.Boolean);
-            Add(ParseMode.Formula);
+            Add(ParseType.Array);
+            Add(ParseType.CustomName);
+            Add(ParseType.String);
+            Add(ParseType.Number);
+            Add(ParseType.Boolean);
+            Add(ParseType.Formula);
         }
     }
 }

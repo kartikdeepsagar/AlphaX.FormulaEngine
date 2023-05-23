@@ -1,16 +1,15 @@
-﻿
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 
 namespace AlphaX.FormulaEngine
 {
-    public class ParseOrder : IEnumerable<ParseMode>
+    public class ParseOrder : IEnumerable<ParseType>
     {
-        private HashSet<ParseMode> _order;
+        private HashSet<ParseType> _order;
 
         public ParseOrder()
         {
-            _order = new HashSet<ParseMode>();
+            _order = new HashSet<ParseType>();
         }
 
         public void Reset()
@@ -18,12 +17,12 @@ namespace AlphaX.FormulaEngine
             _order.Clear();
         }
 
-        public void Add(ParseMode mode)
+        public void Add(ParseType mode)
         {
             _order.Add(mode);
         }
 
-        public IEnumerator<ParseMode> GetEnumerator()
+        public IEnumerator<ParseType> GetEnumerator()
         {
             return _order.GetEnumerator();
         }
