@@ -1,10 +1,8 @@
-﻿using AlphaX.FormulaEngine.Formulas;
-using AlphaX.Parserz;
+﻿using AlphaX.Parserz;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Xml.Linq;
+using System.Linq;
 
 namespace AlphaX.FormulaEngine
 {
@@ -96,6 +94,18 @@ namespace AlphaX.FormulaEngine
 
                 var argumentValue = arguments[index];
 
+                if(argumentValue == null)
+                {
+                    if(argument.AllowNull)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        throw new EvaluationException($"Null is not allowed as argument ({argument.Name}) value.");
+                    }
+                }
+
                 if (argument.Type.IsArray)
                 {
                     ValidateArrayArgument(formula.Name, argument, argumentValue);
@@ -111,40 +121,30 @@ namespace AlphaX.FormulaEngine
         {
             if (arguments.Length > maxArgs || arguments.Length < minArgs)
             {
-                throw new EvaluationException($"Invalid number of arguments for '{formulaName}' formula");
+                throw new EvaluationException($"Invalid number of arguments for '{formulaName}' formula. Expected Min = {minArgs}, Max = {maxArgs} arguments.");
             }
         }
 
         private void ValidateArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
         {
-            if (argumentValue == null)
-            {
-                return;
-            }
-
             if (argumentValue.GetType() != argument.Type)
             {
-                throw new EvaluationException($"Argument ({argument.Name}) type doesn't match with '{formulaName}' formula. Expected array type.");
+                throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected array type.");
             }
         }
 
         private void ValidateNonArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
         {
-            if (argumentValue == null)
-            {
-                return;
-            }
-
-            if (argument.Type == typeof(object))
+            if (argument is ObjectArgument)
             {
                 if(!MatchesSupportedTypes(argumentValue.GetType()))
                 {
-                    throw new EvaluationException($"Argument ({argument.Name}) type doesn't match with '{formulaName}' formula");
+                    throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected String/Double/Int32/Boolean type.");
                 }
             }
             else if (argument.Type != argumentValue.GetType())
             {
-                throw new EvaluationException($"Argument ({argument.Name}) type doesn't match with '{formulaName}' formula");
+                throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected {argument.Type.Name} type.");
             }
         }
 
@@ -167,19 +167,47 @@ namespace AlphaX.FormulaEngine
         {
             if (_engine.Context == null)
             {
-                throw new EvaluationException("Formula require context but no context found.");
+                throw new EvaluationException("No context found to resolve custom name.");
             }
 
             var resolvedValue = _engine.Context.Resolve(customName.Value);
+
+            if (resolvedValue == null)
+                return resolvedValue;
 
             if(resolvedValue is int || resolvedValue is byte)
             {
                 resolvedValue = Convert.ToDouble(resolvedValue);
             }
+            else if (resolvedValue is Array array)
+            {
+                object[] objArray = new object[array.Length];
+
+                for(int index = 0; index < array.Length; index++)
+                {
+                    var arrayItem = array.GetValue(index);
+
+                    if(arrayItem is int || arrayItem is byte)
+                    {
+                        objArray[index] = Convert.ToDouble(arrayItem);
+                    }
+                    else
+                    {
+                        objArray[index] = arrayItem;
+                    }
+                }
+
+                resolvedValue = objArray;
+            }
 
             return resolvedValue;
         }
         #endregion
+
+        private string GetTypeMismatchError(string formulaName, FormulaArgument argument)
+        {
+            return $"Formula : '{formulaName}' - Argument ({argument.Name}) type does't match";
+        }
 
         public static bool Compare(object left, string @operator, object right)
         {

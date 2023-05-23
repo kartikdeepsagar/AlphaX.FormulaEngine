@@ -25,6 +25,11 @@ namespace AlphaX.FormulaEngine
         {
             try
             {
+                if(input == null)
+                {
+                    throw new Exception("Input can't be null");
+                }
+
                 var parserState = ParserFactory.ExpressionParser.Run(input);
 
                 if (parserState.IsError)

@@ -182,7 +182,7 @@ namespace AlphaX.FormulaEngine.Benchmark
             builder.Append($"\"{value}\"");
             builder.Append(")");
             expression.Value = builder.ToString();
-            expression.ExpectedResult = value.ToUpper();
+            expression.ExpectedResult = value.ToLower();
             expression.ArgumentsCount = 1;
             return expression;
         }

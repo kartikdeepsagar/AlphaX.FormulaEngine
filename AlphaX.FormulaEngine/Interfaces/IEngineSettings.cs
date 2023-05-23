@@ -18,6 +18,10 @@
         /// Gets or sets the formula open brakcet symbol.
         /// </summary>
         string OpenBracketSymbol { get; set; }
+        /// <summary>
+        /// Gets or sets the parse order
+        /// </summary>
+        ParseOrder ParseOrder { get; set; }
 
         /// <summary>
         /// Saves the settings.

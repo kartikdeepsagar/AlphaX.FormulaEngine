@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AlphaX.FormulaEngine
 {
@@ -8,6 +9,7 @@ namespace AlphaX.FormulaEngine
         public string OpenBracketSymbol { get; set; }
         public string CloseBracketSymbol { get; set; }
         public string ArgumentsSeparatorSymbol { get; set; }
+        public ParseOrder ParseOrder { get; set; }
 
         public FormulaEngineSettings()
         {
@@ -15,6 +17,7 @@ namespace AlphaX.FormulaEngine
             OpenBracketSymbol = Tokens.OpenBracket;
             ArgumentsSeparatorSymbol = Tokens.Comma;
             DoubleQuotedStrings = true;
+            ParseOrder = new DefaultParseOrder();
             Save();
         }
 
@@ -28,6 +31,9 @@ namespace AlphaX.FormulaEngine
 
             if (ArgumentsSeparatorSymbol is null)
                 throw new NotSupportedException("Argument separator symbol cannot be null");
+
+            if (ParseOrder is null || ParseOrder.Count() == 0)
+                throw new InvalidOperationException("Invalid parser order");
 
             ParserFactory.BuildParser(this);
         }

@@ -16,12 +16,17 @@ namespace AlphaX.FormulaEngine
         /// Gets if the argument is required.
         /// </summary>
         public bool Required { get; }
+        /// <summary>
+        ///  Gets or sets if null is accepted as argument value.
+        /// </summary>
+        public bool AllowNull { get; set; }
 
         public FormulaArgument(string name, Type type, bool required)
         {
             Name = name;
             Type = type;
             Required = required;
+            AllowNull = false;
         }
     }
 
