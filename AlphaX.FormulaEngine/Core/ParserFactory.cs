@@ -56,12 +56,12 @@ namespace AlphaX.FormulaEngine
 
             ArrayParser = Parser.String(Tokens.OpenSquareBracket)
                 .AndThen(whiteSpacesParser)
-                .AndThen(CustomNameParser.Or(StringParser).Or(NumberParser).Or(BooleanParser).Or(Parser.Lazy(() => FormulaParser)).ManySeptBy(arrayCommaParser))
+                .AndThen(GetOrderedArrayValuesParser(settings.ArrayParseOrder).ManySeptBy(arrayCommaParser))
                 .AndThen(Parser.String(Tokens.ClosedSquareBracket))
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[2]);
 
-            var baseArgumentParser = GetOrderedBaseArgumentsParser(settings.ParseOrder);
+            var baseArgumentParser = GetOrderedBaseArgumentsParser(settings.EngineParseOrder);
 
             var formulaArgumentParser = baseArgumentParser
                 .Next(leftOperandResult =>
@@ -148,6 +148,28 @@ namespace AlphaX.FormulaEngine
             foreach(ParseMode mode in parseOrder)
             {
                 if(parser == null)
+                {
+                    parser = GetParser(mode);
+                }
+                else
+                {
+                    parser = parser.Or(GetParser(mode));
+                }
+            }
+
+            return parser.Or(NullParser);
+        }
+
+        private static IParser GetOrderedArrayValuesParser(ParseOrder parseOrder)
+        {
+            IParser parser = null;
+
+            foreach (ParseMode mode in parseOrder)
+            {
+                if (mode == ParseMode.Array)
+                    continue;
+
+                if (parser == null)
                 {
                     parser = GetParser(mode);
                 }

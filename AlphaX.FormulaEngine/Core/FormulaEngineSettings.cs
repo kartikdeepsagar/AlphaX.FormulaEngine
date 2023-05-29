@@ -10,7 +10,8 @@ namespace AlphaX.FormulaEngine
         public string OpenBracketSymbol { get; set; }
         public string CloseBracketSymbol { get; set; }
         public string ArgumentsSeparatorSymbol { get; set; }
-        public ParseOrder ParseOrder { get; set; }
+        public ParseOrder EngineParseOrder { get; set; }
+        public ParseOrder ArrayParseOrder { get; set; }
 
         public FormulaEngineSettings()
         {
@@ -18,7 +19,8 @@ namespace AlphaX.FormulaEngine
             OpenBracketSymbol = Tokens.OpenBracket;
             ArgumentsSeparatorSymbol = Tokens.Comma;
             DoubleQuotedStrings = true;
-            ParseOrder = new DefaultParseOrder();
+            EngineParseOrder = new DefaultParseOrder();
+            ArrayParseOrder = new DefaultArrayParseOrder();
             Save();
         }
 
@@ -33,8 +35,11 @@ namespace AlphaX.FormulaEngine
             if (ArgumentsSeparatorSymbol is null)
                 throw new NotSupportedException("Argument separator symbol cannot be null");
 
-            if (ParseOrder is null || ParseOrder.Count() == 0)
-                throw new InvalidOperationException("Invalid parser order");
+            if (EngineParseOrder is null || EngineParseOrder.Count() == 0)
+                throw new InvalidOperationException("Invalid engine parse order");
+
+            if (ArrayParseOrder is null || ArrayParseOrder.Count() == 0)
+                throw new InvalidOperationException("Invalid array parse order");
 
             ParserFactory.BuildParser(this);
         }

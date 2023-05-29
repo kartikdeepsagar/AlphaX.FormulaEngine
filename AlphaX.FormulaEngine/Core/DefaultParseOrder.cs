@@ -5,11 +5,24 @@
         public DefaultParseOrder()
         {
             Reset();
-            Add(ParseType.Array);
-            Add(ParseType.CustomName);
-            Add(ParseType.String);
             Add(ParseType.Number);
+            Add(ParseType.Array);
+            Add(ParseType.String);
             Add(ParseType.Boolean);
+            Add(ParseType.CustomName);
+            Add(ParseType.Formula);
+        }
+    }
+
+    internal class DefaultArrayParseOrder : ParseOrder
+    {
+        public DefaultArrayParseOrder()
+        {
+            Reset();
+            Add(ParseType.Number);
+            Add(ParseType.String);
+            Add(ParseType.Boolean);
+            Add(ParseType.CustomName);
             Add(ParseType.Formula);
         }
     }

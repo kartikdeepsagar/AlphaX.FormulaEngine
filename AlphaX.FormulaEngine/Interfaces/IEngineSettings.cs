@@ -19,10 +19,13 @@
         /// </summary>
         string OpenBracketSymbol { get; set; }
         /// <summary>
-        /// Gets or sets the parse order
+        /// Gets or sets the parse order for engine.
         /// </summary>
-        ParseOrder ParseOrder { get; set; }
-
+        ParseOrder EngineParseOrder { get; set; }
+        /// <summary>
+        /// Gets or sets the parse order for array values.
+        /// </summary>
+        ParseOrder ArrayParseOrder { get; set; }
         /// <summary>
         /// Saves the settings.
         /// </summary>
