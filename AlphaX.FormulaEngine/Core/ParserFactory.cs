@@ -1,4 +1,5 @@
-﻿using AlphaX.FormulaEngine.Resources;
+﻿using System.Linq;
+using AlphaX.FormulaEngine.Resources;
 using AlphaX.Parserz;
 
 namespace AlphaX.FormulaEngine
@@ -56,12 +57,12 @@ namespace AlphaX.FormulaEngine
 
             ArrayParser = Parser.String(Tokens.OpenSquareBracket)
                 .AndThen(whiteSpacesParser)
-                .AndThen(GetOrderedArrayValuesParser(settings.ArrayParseOrder).ManySeptBy(arrayCommaParser))
+                .AndThen(CreateParserFromParseOrder(settings.ArrayParseOrder, ParseType.Array).ManySeptBy(arrayCommaParser))
                 .AndThen(Parser.String(Tokens.ClosedSquareBracket))
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[2]);
 
-            var baseArgumentParser = GetOrderedBaseArgumentsParser(settings.EngineParseOrder);
+            var baseArgumentParser = CreateParserFromParseOrder(settings.EngineParseOrder);
 
             var formulaArgumentParser = baseArgumentParser
                 .Next(leftOperandResult =>
@@ -141,56 +142,32 @@ namespace AlphaX.FormulaEngine
             ExpressionParser = formulaArgumentParser;
         }
 
-        private static IParser GetOrderedBaseArgumentsParser(ParseOrder parseOrder)
+        private static IParser CreateParserFromParseOrder(IParseOrder parseOrder, params ParseType[] parseTypesToSkip)
         {
             IParser parser = null;
 
-            foreach(ParseMode mode in parseOrder)
+            foreach(ParseType type in parseOrder)
             {
-                if(parser == null)
+                if(parseTypesToSkip != null && parseTypesToSkip.Contains(type))
                 {
-                    parser = GetParser(mode);
-                }
-                else
-                {
-                    parser = parser.Or(GetParser(mode));
-                }
-            }
-
-            return parser.Or(NullParser);
-        }
-
-        private static IParser GetOrderedArrayValuesParser(ParseOrder parseOrder)
-        {
-            IParser parser = null;
-
-            foreach (ParseMode mode in parseOrder)
-            {
-                if (mode == ParseMode.Array)
                     continue;
+                }
 
-                if (parser == null)
-                {
-                    parser = GetParser(mode);
-                }
-                else
-                {
-                    parser = parser.Or(GetParser(mode));
-                }
+                parser = parser == null ? GetParser(type) : parser.Or(GetParser(type));
             }
 
             return parser.Or(NullParser);
         }
 
-        private static IParser GetParser(ParseMode mode)
+        private static IParser GetParser(ParseType mode)
         {
             switch (mode)
             {
-                case ParseMode.Array : return ArrayParser;
-                case ParseMode.Boolean : return BooleanParser;
-                case ParseMode.String : return StringParser;
-                case ParseMode.Number : return NumberParser;
-                case ParseMode.CustomName : return CustomNameParser;
+                case ParseType.Array : return ArrayParser;
+                case ParseType.Boolean : return BooleanParser;
+                case ParseType.String : return StringParser;
+                case ParseType.Number : return NumberParser;
+                case ParseType.CustomName : return CustomNameParser;
                 default:
                     return Parser.Lazy(() => FormulaParser);
             }

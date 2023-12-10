@@ -10,8 +10,8 @@ namespace AlphaX.FormulaEngine
         public string OpenBracketSymbol { get; set; }
         public string CloseBracketSymbol { get; set; }
         public string ArgumentsSeparatorSymbol { get; set; }
-        public ParseOrder EngineParseOrder { get; set; }
-        public ParseOrder ArrayParseOrder { get; set; }
+        public IParseOrder EngineParseOrder { get; set; }
+        public IParseOrder ArrayParseOrder { get; set; }
 
         public FormulaEngineSettings()
         {
@@ -19,8 +19,8 @@ namespace AlphaX.FormulaEngine
             OpenBracketSymbol = Tokens.OpenBracket;
             ArgumentsSeparatorSymbol = Tokens.Comma;
             DoubleQuotedStrings = true;
-            EngineParseOrder = new DefaultParseOrder();
-            ArrayParseOrder = new DefaultArrayParseOrder();
+            EngineParseOrder = ParseOrderBuilder.DefaultParseOrder;
+            ArrayParseOrder = ParseOrderBuilder.DefaultArrayParseOrder;
             Save();
         }
 

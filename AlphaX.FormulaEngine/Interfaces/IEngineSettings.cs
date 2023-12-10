@@ -21,11 +21,11 @@
         /// <summary>
         /// Gets or sets the parse order for engine.
         /// </summary>
-        ParseOrder EngineParseOrder { get; set; }
+        IParseOrder EngineParseOrder { get; set; }
         /// <summary>
         /// Gets or sets the parse order for array values.
         /// </summary>
-        ParseOrder ArrayParseOrder { get; set; }
+        IParseOrder ArrayParseOrder { get; set; }
         /// <summary>
         /// Saves the settings.
         /// </summary>

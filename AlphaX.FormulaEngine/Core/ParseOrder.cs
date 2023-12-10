@@ -3,18 +3,14 @@ using System.Collections.Generic;
 
 namespace AlphaX.FormulaEngine
 {
-    public class ParseOrder : IEnumerable<ParseType>
+    internal class ParseOrder : IParseOrder
     {
         private HashSet<ParseType> _order;
 
-        public ParseOrder()
+        public ParseOrder(ParseType firstParseType)
         {
             _order = new HashSet<ParseType>();
-        }
-
-        public void Reset()
-        {
-            _order.Clear();
+            Add(firstParseType);
         }
 
         public void Add(ParseType mode)
