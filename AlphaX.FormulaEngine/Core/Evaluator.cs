@@ -60,7 +60,7 @@ namespace AlphaX.FormulaEngine
                     return arguments.ToArray();
 
                 var parsedArguments = (object[])arguments[0];
-                ValidateArguments(formula, parsedArguments);
+                formula.ValidateArguments(parsedArguments);
                 return formula.Evaluate(parsedArguments);
             }
             else if (result is ConditionResult conditionResult)
@@ -76,83 +76,6 @@ namespace AlphaX.FormulaEngine
                 return result.Value;
             }
         }
-
-        #region Argument Validation
-        private void ValidateArguments(Formula formula, object[] arguments)
-        {
-            if (formula == null)
-                return;
-
-            ValidateArgumentCount(formula.Info.MinArgsCount, formula.Info.MaxArgsCount, formula.Name, arguments);
-
-            for (int index = 0; index < formula.Info.MaxArgsCount; index++)
-            {
-                var argument = formula.Info.Arguments[index];
-
-                if (index > arguments.Length - 1)
-                    break;
-
-                var argumentValue = arguments[index];
-
-                if(argumentValue == null)
-                {
-                    if(argument.AllowNull)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        throw new EvaluationException($"Null is not allowed as argument ({argument.Name}) value.");
-                    }
-                }
-
-                if (argument.Type.IsArray)
-                {
-                    ValidateArrayArgument(formula.Name, argument, argumentValue);
-                }
-                else
-                {
-                    ValidateNonArrayArgument(formula.Name, argument, argumentValue);
-                }
-            }
-        }
-
-        private void ValidateArgumentCount(int minArgs, int maxArgs, string formulaName, object[] arguments)
-        {
-            if (arguments.Length > maxArgs || arguments.Length < minArgs)
-            {
-                throw new EvaluationException($"Invalid number of arguments for '{formulaName}' formula. Expected Min = {minArgs}, Max = {maxArgs} arguments.");
-            }
-        }
-
-        private void ValidateArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
-        {
-            if (argumentValue.GetType() != argument.Type)
-            {
-                throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected array type.");
-            }
-        }
-
-        private void ValidateNonArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
-        {
-            if (argument is ObjectArgument)
-            {
-                if(!MatchesSupportedTypes(argumentValue.GetType()))
-                {
-                    throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected String/Double/Int32/Boolean type.");
-                }
-            }
-            else if (argument.Type != argumentValue.GetType())
-            {
-                throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected {argument.Type.Name} type.");
-            }
-        }
-
-        private bool MatchesSupportedTypes(Type type)
-        {
-            return type == typeof(string) || type == typeof(double) || type == typeof(int) || type == typeof(bool);
-        }
-        #endregion
 
         #region Argument resolving
         private bool ResolveCondition(Condition condition)
@@ -203,11 +126,6 @@ namespace AlphaX.FormulaEngine
             return resolvedValue;
         }
         #endregion
-
-        private string GetTypeMismatchError(string formulaName, FormulaArgument argument)
-        {
-            return $"Formula : '{formulaName}' - Argument ({argument.Name}) type does't match";
-        }
 
         public static bool Compare(object left, string @operator, object right)
         {

@@ -4,7 +4,8 @@
     {  
         static void Main(string[] args)
         {
-            FormulaEngineBenchmark.RunBenchmarks(500);
+            var engine = new AlphaXFormulaEngine();
+            FormulaEngineBenchmark.RunBenchmarks(engine, 1000);
         }
     }
 }

@@ -24,6 +24,11 @@ namespace AlphaX.FormulaEngine
 
         public void AddArgument(FormulaArgument argument)
         {
+            if (_arguments.Any(x => string.Equals(x.Name, argument.Name, System.StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new AlphaXFormulaEngineException($"A formula argument with name '{argument.Name}' already exist.");
+            }
+
             _arguments.Add(argument);
 
             if(argument.Required)

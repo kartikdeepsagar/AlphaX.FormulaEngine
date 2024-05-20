@@ -10,11 +10,9 @@ namespace AlphaX.FormulaEngine.Benchmark
     {
         private static Stopwatch _expressionWatch;
         private static Stopwatch _benchmarkWatch;
-        private static IFormulaEngine _formulaEngine;
 
-        public static void RunBenchmarks(int arguments = 500)
+        public static void RunBenchmarks(IFormulaEngine engine, int arguments = 500)
         {
-            _formulaEngine = new AlphaXFormulaEngine();
             _expressionWatch = new Stopwatch();
             _benchmarkWatch = new Stopwatch();
 
@@ -30,7 +28,7 @@ namespace AlphaX.FormulaEngine.Benchmark
             for (int index = 1; index <= expressions.Count; index++)
             {
                 Console.WriteLine($"----BENCHMARK {index}/{expressions.Count}----");
-                RunExpressionBenchmark(expressions[index - 1]);
+                RunExpressionBenchmark(engine, expressions[index - 1]);
             }
 
             _benchmarkWatch.Stop();
@@ -76,7 +74,7 @@ namespace AlphaX.FormulaEngine.Benchmark
             return expressions;
         }
 
-        private static void RunExpressionBenchmark(FormulaExpression expression)
+        private static void RunExpressionBenchmark(IFormulaEngine engine, FormulaExpression expression)
         {
             _expressionWatch.Reset();
             Console.WriteLine($"Expression : {expression.Value.Substring(0, 50)}...)");
@@ -89,7 +87,7 @@ namespace AlphaX.FormulaEngine.Benchmark
 
             Console.WriteLine($"Evaluating expression...");
             _expressionWatch.Start();
-            var result = _formulaEngine.Evaluate(expression.Value);
+            var result = engine.Evaluate(expression.Value);
             _expressionWatch.Stop();
 
             if (expression.ExpectedResult is string)

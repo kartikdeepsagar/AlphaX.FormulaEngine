@@ -1,5 +1,4 @@
 ﻿using AlphaX.FormulaEngine.Formulas;
-using AlphaX.Parserz;
 using System;
 
 namespace AlphaX.FormulaEngine
@@ -63,6 +62,8 @@ namespace AlphaX.FormulaEngine
             // Arithmetic
             FormulaStore.Add(new SumFormula());
             FormulaStore.Add(new AverageFormula());
+            FormulaStore.Add(new CeilingFormula());
+            FormulaStore.Add(new FloorFormula());
 
             // Array
             FormulaStore.Add(new ArrayContainsFormula());
@@ -77,6 +78,7 @@ namespace AlphaX.FormulaEngine
             FormulaStore.Add(new ContainsFormula());
             FormulaStore.Add(new StartsWithFormula());
             FormulaStore.Add(new EndsWithFormula());
+            FormulaStore.Add(new RegexMatchFormula());
 
             // DateTime
             FormulaStore.Add(new TodayFormula());
