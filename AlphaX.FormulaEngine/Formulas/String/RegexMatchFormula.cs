@@ -17,9 +17,20 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new StringArgument("pattern", true));
-            info.AddArgument(new StringArgument("value", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Searches the input string for the first occurence of regular expression."
+            };
+
+            info.AddArgument(new StringArgument("pattern", true)
+            {
+                Description = "Pattern to match."
+            });
+
+            info.AddArgument(new StringArgument("value", true)
+            {
+                Description = "Input value."
+            });
             return info;
         }
     }

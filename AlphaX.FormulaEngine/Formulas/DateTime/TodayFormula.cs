@@ -11,12 +11,32 @@ namespace AlphaX.FormulaEngine.Formulas
 
         public override object Evaluate(params object[] args)
         {
-            return DateTime.Now.Date.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+            try
+            {
+                if (args.Length > 0)
+                {
+                    return DateTime.Now.Date.ToString(args[0].ToString());
+                }
+
+                return DateTime.Now.Date.ToString(CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern);
+            }
+            catch
+            {
+                return "#ERROR";
+            }
         }
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            return new FormulaInfo();
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Returns system current date."
+            };
+            info.AddArgument(new StringArgument("format", false)
+            {
+                Description = "Format string."
+            });
+            return info;
         }
     }
 }

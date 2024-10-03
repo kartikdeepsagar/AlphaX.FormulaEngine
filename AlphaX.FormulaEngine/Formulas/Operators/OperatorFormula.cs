@@ -1,23 +1,35 @@
-﻿namespace AlphaX.FormulaEngine.Formulas
+﻿using System;
+
+namespace AlphaX.FormulaEngine.Formulas
 {
-    internal abstract class OperatorFormula : Formula
+    internal class OperatorFormula : Formula
     {
-        protected OperatorFormula(string name) : base(name)
+        protected Func<string> _getOperator;
+
+        internal OperatorFormula(string name, Func<string> getOperator) : base(name)
         {
+            _getOperator = getOperator;
         }
 
         public override object Evaluate(params object[] args)
         {
-            return Evaluator.Compare(args[0], GetOperator(), args[1]);
+            return Engine.Evaluator.Compare(args[0], _getOperator(), args[1]);
         }
-
-        protected abstract string GetOperator();
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new ObjectArgument("value1", true));
-            info.AddArgument(new ObjectArgument("value2", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = $"Performs '{Name}' logical operation between two operands."
+            };
+            info.AddArgument(new ObjectArgument("value1", true)
+            {
+                Description = "The first operand."
+            });
+            info.AddArgument(new ObjectArgument("value2", true)
+            {
+                Description = "The second operand."
+            });
             return info;
         }
     }

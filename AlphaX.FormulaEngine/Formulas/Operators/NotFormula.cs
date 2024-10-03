@@ -8,13 +8,26 @@
 
         public override object Evaluate(params object[] args)
         {
-            return !(bool)args[0];
+            try
+            {
+                return !(bool)args[0];
+            }
+            catch
+            {
+                return "#ERROR";
+            }
         }
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new BooleanArgument("value1", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Inverse a boolean value."
+            };
+            info.AddArgument(new BooleanArgument("value1", true)
+            {
+                Description = "Value to inverse."
+            });
             return info;
         }
     }

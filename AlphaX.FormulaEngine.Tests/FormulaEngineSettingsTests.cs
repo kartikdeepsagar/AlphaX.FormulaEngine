@@ -24,9 +24,12 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("SUM[[1, SUM[[1,2,SUM[[2,2]]]], 4]]", 12)]
         public void FormulaSettings_SuccessTest(string input, double output)
         {
-            _formulaEngine.Settings.OpenBracketSymbol = "[";
-            _formulaEngine.Settings.CloseBracketSymbol = "]";
-            _formulaEngine.Settings.Save();
+            _formulaEngine.ApplySettings(new EngineSettings()
+            {
+                OpenBracketSymbol = "[",
+                CloseBracketSymbol = "]",
+            });
+
             var result = _formulaEngine.Evaluate(input);
             Assert.That(result.Value, Is.EqualTo(output));
         }
@@ -38,30 +41,48 @@ namespace AlphaX.FormulaEngine.Tests
         [TestCase("TEXTSPLIT{\";\"| \"test;sds\"}", 23)]
         public void FormulaSettings_SuccessTest2(string input, double output)
         {
-            _formulaEngine.Settings.OpenBracketSymbol = "{";
-            _formulaEngine.Settings.CloseBracketSymbol = "}";
-            _formulaEngine.Settings.ArgumentsSeparatorSymbol = "|";
-            _formulaEngine.Settings.Save();
+            _formulaEngine.ApplySettings(new EngineSettings()
+            {
+                OpenBracketSymbol = "{",
+                CloseBracketSymbol = "}",
+                ArgumentsSeparatorSymbol = "|",
+            });
+
             var result = _formulaEngine.Evaluate(input);
             Assert.IsNull(result.Error);
         }
 
         public void FormulaSettings_FailureTest(string input, double output)
         {
-            _formulaEngine.Settings.OpenBracketSymbol = null;
-            Assert.Throws<NotSupportedException>(() => { _formulaEngine.Settings.Save(); });
+            Assert.Throws<ArgumentNullException>(() => {
+
+                _formulaEngine.ApplySettings(new EngineSettings()
+                {
+                    OpenBracketSymbol = null
+                });
+            });
         }
 
         public void FormulaSettings_FailureTests2(string input, double output)
         {
-            _formulaEngine.Settings.CloseBracketSymbol = null;
-            Assert.Throws<NotSupportedException>(() =>{ _formulaEngine.Settings.Save(); });
+            Assert.Throws<ArgumentNullException>(() => {
+
+                _formulaEngine.ApplySettings(new EngineSettings()
+                {
+                    OpenBracketSymbol = null
+                });
+            });
         }
 
         public void FormulaSettings_FailureTests3(string input, double output)
         {
-            _formulaEngine.Settings.ArgumentsSeparatorSymbol = null;
-            Assert.Throws<NotSupportedException>(() =>{ _formulaEngine.Settings.Save(); });
+            Assert.Throws<ArgumentNullException>(() => {
+
+                _formulaEngine.ApplySettings(new EngineSettings()
+                {
+                    ArgumentsSeparatorSymbol = null
+                });
+            });
         }
     }
 }

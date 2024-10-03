@@ -4,6 +4,8 @@ namespace AlphaX.FormulaEngine
 {
     public abstract class Formula
     {
+        internal AlphaXFormulaEngine Engine { get; set; }
+
         /// <summary>
         /// Gets the unique formula name.
         /// </summary>

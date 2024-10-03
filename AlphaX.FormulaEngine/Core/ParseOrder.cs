@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace AlphaX.FormulaEngine
 {
-    internal class ParseOrder : IParseOrder
+    public class ParseOrder : IParseOrder
     {
         private HashSet<ParseType> _order;
 

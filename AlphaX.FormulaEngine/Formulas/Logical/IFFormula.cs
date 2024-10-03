@@ -26,16 +26,28 @@ namespace AlphaX.FormulaEngine.Formulas
             }
             else
             {
-                return false;
+                return "#ERROR";
             }
         }
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new BooleanArgument("condition", true));
-            info.AddArgument(new ObjectArgument("value1", true));
-            info.AddArgument(new ObjectArgument("value2", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Checks whether condition is met. Returns first value if true and return second value if false."
+            };
+            info.AddArgument(new BooleanArgument("condition", true)
+            {
+                Description = "Condition to evaluate."
+            });
+            info.AddArgument(new ObjectArgument("value1", true)
+            {
+                Description = "Value to return if condition is true."
+            });
+            info.AddArgument(new ObjectArgument("value2", true)
+            {
+                Description = "Value to return if condition is false."
+            });
             return info;
         }
     }

@@ -11,24 +11,24 @@
         /// </summary>
         string ArgumentsSeparatorSymbol { get; set; }
         /// <summary>
-        /// Gets or sets the formula close bracket symbol.
+        /// Gets or sets the formula close bracket symbol. Default is ')'.
         /// </summary>
         string CloseBracketSymbol { get; set; }
         /// <summary>
-        /// Gets or sets the formula open brakcet symbol.
+        /// Gets or sets the formula open brakcet symbol.  Default is '('.
         /// </summary>
         string OpenBracketSymbol { get; set; }
         /// <summary>
-        /// Gets or sets the parse order for engine.
+        /// Gets or sets the parse order for engine. The engine will try to parse formula argument in the specified order. This could be used to improve engine performance. For example, Number could be specified first in parse order if the formulas to be used only uses numeric arguments.
         /// </summary>
         IParseOrder EngineParseOrder { get; set; }
         /// <summary>
-        /// Gets or sets the parse order for array values.
+        /// Gets or sets the parse order for array values. The engine will try to parse array values in the specified order.
         /// </summary>
         IParseOrder ArrayParseOrder { get; set; }
         /// <summary>
-        /// Saves the settings.
+        /// Gets or sets the logical operator mode. For example, 'eq' instead of '=', 'ne' instead of '!=' etc.
         /// </summary>
-        void Save();
+        LogicalOperatorMode LogicalOperatorMode { get; set; }
     }
 }

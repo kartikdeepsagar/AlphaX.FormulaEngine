@@ -14,8 +14,14 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new DoubleArgument("value", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Returns the largest integral value that is less than or equal to the specified decimal number."
+            };
+            info.AddArgument(new DoubleArgument("value", true)
+            {
+                Description = "A decimal number."
+            });
             return info;
         }
     }

@@ -13,9 +13,18 @@
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new StringArgument("source", true));
-            info.AddArgument(new StringArgument("value", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Checks if the provided string contains the speicifed value."
+            };
+            info.AddArgument(new StringArgument("source", true)
+            {
+                Description = "The source string."
+            });
+            info.AddArgument(new StringArgument("value", true)
+            {
+                Description = "The value to check for."
+            });
             return info;
         }
     }

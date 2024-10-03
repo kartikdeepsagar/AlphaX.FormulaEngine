@@ -9,10 +9,6 @@ namespace AlphaX.FormulaEngine
         /// </summary>
         IEngineContext Context { get; set; }
         /// <summary>
-        /// Gets the engine settings.
-        /// </summary>
-        IEngineSettings Settings { get; }
-        /// <summary>
         /// Gets the formula store.
         /// </summary>
         IFormulaStore FormulaStore { get; }
@@ -22,5 +18,11 @@ namespace AlphaX.FormulaEngine
         /// <param name="input"></param>
         /// <returns></returns>
         IEvaluationResult Evaluate(string input);
+
+        /// <summary>
+        /// Applies settings to the engine.
+        /// </summary>
+        /// <param name="settings"></param>
+        void ApplySettings(IEngineSettings settings);
     }
 }

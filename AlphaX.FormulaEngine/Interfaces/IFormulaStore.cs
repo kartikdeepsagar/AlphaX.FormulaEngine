@@ -22,10 +22,10 @@ namespace AlphaX.FormulaEngine
         /// <returns></returns>
         Formula Get(string formulaName);
         /// <summary>
-        /// Gets all the formulas.
+        /// Gets information of all the formulas available.
         /// </summary>
         /// <returns></returns>
-        IEnumerable<Formula> GetAll();
+        IEnumerable<FormulaInfo> GetAll();
         /// <summary>
         /// Removes a formula.
         /// </summary>
