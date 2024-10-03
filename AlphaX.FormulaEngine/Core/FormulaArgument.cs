@@ -5,6 +5,10 @@ namespace AlphaX.FormulaEngine
     public abstract class FormulaArgument
     {
         /// <summary>
+        /// Gets or sets the description of the argument.
+        /// </summary>
+        public string Description { get; set; }
+        /// <summary>
         /// Gets the name of the argument.
         /// </summary>
         public string Name { get; }

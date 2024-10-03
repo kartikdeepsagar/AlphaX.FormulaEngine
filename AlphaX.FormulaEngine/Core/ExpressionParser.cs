@@ -1,67 +1,73 @@
-﻿using AlphaX.FormulaEngine.Resources;
+﻿using System.Linq;
+using AlphaX.FormulaEngine.Resources;
 using AlphaX.Parserz;
 
 namespace AlphaX.FormulaEngine
 {
-    internal static class ParserFactory
+    internal class ExpressionParser : IParser
     {
-        public static IParser FormulaParser { get; private set; }
-        public static IParser NumberParser { get; private set; }
-        public static IParser BooleanParser { get; private set; }
-        public static IParser StringParser { get; private set; }
-        public static IParser CustomNameParser { get; private set; }
-        public static IParser ArrayParser { get; private set; }
-        public static IParser ExpressionParser { get; private set; }
-        public static IParser NullParser { get; private set; }
+        private IParser _formulaParser;
+        private IParser _numberParser;
+        private IParser _boolParser;
+        private IParser _stringParser;
+        private IParser _customNameParser;
+        private IParser _arrayParser;
+        private IParser _expressionParser;
+        private IParser _nullParser;
 
-        public static void BuildParser(IEngineSettings settings)
+        public ExpressionParser(IEngineSettings settings, Operator @operator)
+        {
+            BuildParser(settings, @operator);
+        }
+
+        private void BuildParser(IEngineSettings settings, Operator @operator)
         {
             var emtpyStringResult = new StringResult(string.Empty);
             var whiteSpacesParser = Parser.WhiteSpace.Many().MapResult(x => emtpyStringResult);
 
-            NullParser = Parser.String("null").MapResult(x => new StringResult(null));
+            _nullParser = Parser.String("null").MapResult(x => new StringResult(null));
 
-            var logicalOperatorParsers = Parser.String(Tokens.EqualsTo)
-              .Or(Parser.String(Tokens.NotEquals))
-              .Or(Parser.String(Tokens.LessThanEqualsTo))
-              .Or(Parser.String(Tokens.GreaterThanEqualsTo))
-              .Or(Parser.String(Tokens.LessThan))
-              .Or(Parser.String(Tokens.GreaterThan))
-              .Or(Parser.String(Tokens.AND))
-              .Or(Parser.String(Tokens.OR))
+            var logicalOperatorParsers = Parser.String(@operator.EqualsTo)
+              .Or(Parser.String(@operator.NotEquals))
+              .Or(Parser.String(@operator.LessThanEqualsTo))
+              .Or(Parser.String(@operator.GreaterThanEqualsTo))
+              .Or(Parser.String(@operator.LessThan))
+              .Or(Parser.String(@operator.GreaterThan))
+              .Or(Parser.String(@operator.AND))
+              .Or(Parser.String(@operator.OR))
               .AndThen(whiteSpacesParser)
               .MapResult(x => x.Value[0]);
 
-            CustomNameParser = Parser.String(Tokens.Custom)
+            _customNameParser = Parser.String(SyntaxTokens.Custom)
                 .AndThen(Parser.AnyLetterOrDigit().Many().MapResult(x => x.ToStringResult()))
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => new CustomNameResult(new CustomName(x.Value[1].Value?.ToString())));
 
-            StringParser = Parser.StringValue(settings.DoubleQuotedStrings)
+            _stringParser = Parser.StringValue(settings.DoubleQuotedStrings)
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            BooleanParser = Parser.Boolean
+            _boolParser = Parser.Boolean
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            NumberParser = Parser.Number(true)
+            _numberParser = Parser.Number(true)
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            var arrayCommaResult = new StringResult(Tokens.Comma);
-            var arrayCommaParser = Parser.String(Tokens.Comma)
+            var arrayCommaResult = new StringResult(SyntaxTokens.Comma);
+            var arrayCommaParser = Parser.String(SyntaxTokens.Comma)
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => arrayCommaResult);
 
-            ArrayParser = Parser.String(Tokens.OpenSquareBracket)
+            _arrayParser = Parser.String(SyntaxTokens.OpenSquareBracket)
                 .AndThen(whiteSpacesParser)
-                .AndThen(GetOrderedArrayValuesParser(settings.ArrayParseOrder).ManySeptBy(arrayCommaParser))
-                .AndThen(Parser.String(Tokens.ClosedSquareBracket))
+                .AndThen(CreateParserFromParseOrder(settings.ArrayParseOrder, ParseType.Array).ManySeptBy(arrayCommaParser))
+                .AndThen(Parser.String(SyntaxTokens.ClosedSquareBracket))
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[2]);
 
-            var baseArgumentParser = GetOrderedBaseArgumentsParser(settings.EngineParseOrder);
+            var baseArgumentParser = CreateParserFromParseOrder(settings.EngineParseOrder);
 
             var formulaArgumentParser = baseArgumentParser
                 .Next(leftOperandResult =>
@@ -132,68 +138,54 @@ namespace AlphaX.FormulaEngine
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => commaResult);
 
-            FormulaParser = formulaNameParser
+            _formulaParser = formulaNameParser
                 .AndThen(openBracketParser)
                 .AndThen(formulaArgumentParser.ManySeptBy(commaParser))
                 .AndThen(closeBracketParser)
                 .MapError(x => new ParserError(x.Index, "Invalid formula expression"));
 
-            ExpressionParser = formulaArgumentParser;
+            _expressionParser = formulaArgumentParser;
         }
 
-        private static IParser GetOrderedBaseArgumentsParser(ParseOrder parseOrder)
+        private IParser CreateParserFromParseOrder(IParseOrder parseOrder, params ParseType[] parseTypesToSkip)
         {
             IParser parser = null;
 
-            foreach(ParseMode mode in parseOrder)
+            foreach(ParseType type in parseOrder)
             {
-                if(parser == null)
+                if(parseTypesToSkip != null && parseTypesToSkip.Contains(type))
                 {
-                    parser = GetParser(mode);
-                }
-                else
-                {
-                    parser = parser.Or(GetParser(mode));
-                }
-            }
-
-            return parser.Or(NullParser);
-        }
-
-        private static IParser GetOrderedArrayValuesParser(ParseOrder parseOrder)
-        {
-            IParser parser = null;
-
-            foreach (ParseMode mode in parseOrder)
-            {
-                if (mode == ParseMode.Array)
                     continue;
+                }
 
-                if (parser == null)
-                {
-                    parser = GetParser(mode);
-                }
-                else
-                {
-                    parser = parser.Or(GetParser(mode));
-                }
+                parser = parser == null ? GetParser(type) : parser.Or(GetParser(type));
             }
 
-            return parser.Or(NullParser);
+            return parser.Or(_nullParser);
         }
 
-        private static IParser GetParser(ParseMode mode)
+        private IParser GetParser(ParseType mode)
         {
             switch (mode)
             {
-                case ParseMode.Array : return ArrayParser;
-                case ParseMode.Boolean : return BooleanParser;
-                case ParseMode.String : return StringParser;
-                case ParseMode.Number : return NumberParser;
-                case ParseMode.CustomName : return CustomNameParser;
+                case ParseType.Array : return _arrayParser;
+                case ParseType.Boolean : return _boolParser;
+                case ParseType.String : return _stringParser;
+                case ParseType.Number : return _numberParser;
+                case ParseType.CustomName : return _customNameParser;
                 default:
-                    return Parser.Lazy(() => FormulaParser);
+                    return Parser.Lazy(() => _formulaParser);
             }
+        }
+
+        public IParserState Run(string input)
+        {
+            return _expressionParser.Run(input);
+        }
+
+        public IParserState Parse(IParserState inputState)
+        {
+            return _expressionParser.Parse(inputState);
         }
     }
 }

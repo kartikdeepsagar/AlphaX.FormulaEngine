@@ -14,10 +14,22 @@
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new StringArgument("source", true));
-            info.AddArgument(new StringArgument("value", true));
-            info.AddArgument(new BooleanArgument("matchCase", false));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Checks if the provided string starts with the speicifed value."
+            };
+            info.AddArgument(new StringArgument("source", true)
+            {
+                Description = "The source string."
+            });
+            info.AddArgument(new StringArgument("value", true)
+            {
+                Description = "The value to check for."
+            });
+            info.AddArgument(new BooleanArgument("matchCase", false)
+            {
+                Description = "Match case while checking."
+            });
             return info;
         }
     }

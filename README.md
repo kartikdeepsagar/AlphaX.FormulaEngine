@@ -1,4 +1,5 @@
 
+
 # AlphaX.FormulaEngine
 
 A strong and fast library to parse and evaluate formulas. It also supports custom formulas. This library is built using '[AlphaX.Parserz](https://www.nuget.org/packages/AlphaX.Parserz)' library.
@@ -26,7 +27,7 @@ AlphaXFormulaEngine comes with a limited number (not many) of inbuilt formulas i
 - LOWER - Returns lower cased string. For example: LOWER("TESTSTRING") // teststring
 - UPPER - Returns upper cased string. For example: UPPER("teststring") // TESTSTRING
 - TEXTSPLIT - Returns splitted string using a seperator. For example: TEXTSPLIT(".", "John.Doe") // John  Doe
-- CONCAT - Joins multiple strings into one string: For example: CONCAT("Test","String","1") // TestString1
+- CONCAT - Joins multiple strings into one string: For example: CONCAT(["Test","String","1"]) // TestString1
 - LENGTH - Gets the length of a string. For example: LENGTH("AlphaX")  // 6
 - CONTAINS - Checks if a string contains another string. For example: CONTAINS("AlphaX", "pha")  // true
 - STARTSWITH - Checks if a string starts with the provided string. Accepts third (optional) parameter as boolean to match case. Default = false. For example: STARTSWITH("AlphaX", "Al", true)  // true
@@ -45,6 +46,7 @@ AlphaXFormulaEngine comes with a limited number (not many) of inbuilt formulas i
 - NOT - Inverse a boolean value/expression. For example: NOT(1 == 1)  // false
 - AND - Performs AND (&&) operation between 2 boolean values/expressions. For example: AND(true, 1 != 1)  // false
 - OR - Performs OR (||) operation between 2 boolean values/expressions. For example: OR(true, 1 != 1)  // true
+- IF - Checks whether condition is met. Returns first value if true and return second value if false. For example: IF(UPPER(\"alphax\") = UPPER(\"ALphaX\"), true, false) // true
 
 #### Array Formulas
 - ARRAYCONTAINS - Checks if array contains a value. For example: ARRAYCONTAINS([1,2,3], 2)  // true
@@ -116,6 +118,8 @@ Console.WriteLine(result.Value); // 64
 ```
 # Customizing Engine Settings
 
+### Formula format
+
 AlphaXFormulaEngine allows you to customize the formula string format. By, default the formula format is :
 
 FormulaName(argument1, argument2, argument3......)
@@ -127,15 +131,87 @@ FormulaName[argument1 | argument 2 | argument 3....]
 Doing this is a piece of cake using engine settings as follows:
 ```c#
 AlphaX.FormulaEngine.AlphaXFormulaEngine engine = new AlphaX.FormulaEngine.AlphaXFormulaEngine();
-engine.Settings.ArgumentsSeparatorSymbol = "|";
-engine.Settings.OpenBracketSymbol = "[";
-engine.Settings.CloseBracketSymbol = "]";
-engine.Settings.Save();
+// apply settings
+_formulaEngine.ApplySettings(new EngineSettings()
+{
+     OpenBracketSymbol = "[",
+     CloseBracketSymbol = "]",
+     ArgumentsSeparatorSymbol = "|",
+});
 
 engine.AddFormula(new MyFormula());
 AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("MyFormula[4|3]");
 Console.WriteLine(result.Value); // 64
 ```
+### Operator Mode
+
+AlphaXFormulaEngine allows you to choose different type logical operators. For example, You can use 'eq' instead of '=' with logical expression. For example, IF(1 eq 1, true, false)
+```c#
+_formulaEngine.ApplySettings(new EngineSettings()
+{
+     LogicalOperatorMode = LogicalOperatorMode.Query
+});
+```
+Below are the current supported operators in Query mode.
+```
+'=' as 'eq'
+'!=' as 'ne'
+'<' as 'lt'
+'>' as 'gt'
+'<=' as 'le'
+'>=' as 'ge'
+'&&' as 'and'
+'||' as 'or'
+```
+### Parse Order
+
+AlphaXFormulaEngine allows you to optimize the engine performance based on your use case. You can argument parsing order. For example, if your use case requires formulas with only the number arguments then you can specify the parse order as:
+```c#
+ParseOrder order = new ParseOrder(ParseType.Number); // first try to parse a number
+order.Add(ParseType.String) //then try to parse a string.
+order.Add(ParseType.Boolean) // then try to parse a boolean i.e. true/false
+EngineSettings settings = new EngineSettings();
+settings.EngineParseOrder = order;
+_formulaEngine.ApplySettings(settings);
+```
+The same thing can be done to provide the parse order for the values present inside array argument using EngineSetting's ArrayParseOrder property.
+
+# Custom Name as Arguments
+AlphaXFormulaEngine allows you to use custom names as formula arguments which can be resolved using AlphaX.FormulaEngine.IEngineContext.
+
+For example, we can provide support for the 'CustomName1', ' 'CustomName2, 'CustomName3' custom names as follows:
+1. Create an engine context using IEngineContext interface:
+```c#
+public class TestEngineContext : IEngineContext
+{
+    public object Resolve(string key)
+    {
+        switch (key)
+        {
+            case "CustomName1":
+                return 2; // return 2 if custom name is 'CustomName1'
+
+            case "CustomName2":
+                return 10; // return 10 if custom name is 'CustomName2'
+
+            case "CustomName3":
+                return "TestString"; // return 'TestString' if custom name is 'CustomName3'
+        }
+
+        throw new Exception("Invalid custom name");
+    }
+}
+```
+2. Now pass the context to the engine as follows:
+```c#
+ AlphaXFormulaEngine formulaEngine = new AlphaXFormulaEngine(new TestEngineContext());
+```
+Now since we have create our context. we can simply evaluate it as follows:
+```
+AlphaX.FormulaEngine.IEvaluationResult result = engine.Evaluate("EQUALS($CustomName1, 2)");
+Console.WriteLine(result.Value);  // true
+```
+
 # Nested Formulas
 
 To make your life easy, we have also added support for nested formulas. So, you can use a formula as a formula argument for another formula as follows:

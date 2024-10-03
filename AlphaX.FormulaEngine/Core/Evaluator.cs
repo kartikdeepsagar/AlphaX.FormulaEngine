@@ -1,16 +1,14 @@
 ﻿using AlphaX.Parserz;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace AlphaX.FormulaEngine
 {
     internal class Evaluator
     {
-        private IFormulaEngine _engine;
+        private AlphaXFormulaEngine _engine;
 
-        public Evaluator(IFormulaEngine engine)
+        public Evaluator(AlphaXFormulaEngine engine)
         {
             _engine = engine;
         }
@@ -60,7 +58,7 @@ namespace AlphaX.FormulaEngine
                     return arguments.ToArray();
 
                 var parsedArguments = (object[])arguments[0];
-                ValidateArguments(formula, parsedArguments);
+                formula.ValidateArguments(parsedArguments);
                 return formula.Evaluate(parsedArguments);
             }
             else if (result is ConditionResult conditionResult)
@@ -77,83 +75,6 @@ namespace AlphaX.FormulaEngine
             }
         }
 
-        #region Argument Validation
-        private void ValidateArguments(Formula formula, object[] arguments)
-        {
-            if (formula == null)
-                return;
-
-            ValidateArgumentCount(formula.Info.MinArgsCount, formula.Info.MaxArgsCount, formula.Name, arguments);
-
-            for (int index = 0; index < formula.Info.MaxArgsCount; index++)
-            {
-                var argument = formula.Info.Arguments[index];
-
-                if (index > arguments.Length - 1)
-                    break;
-
-                var argumentValue = arguments[index];
-
-                if(argumentValue == null)
-                {
-                    if(argument.AllowNull)
-                    {
-                        continue;
-                    }
-                    else
-                    {
-                        throw new EvaluationException($"Null is not allowed as argument ({argument.Name}) value.");
-                    }
-                }
-
-                if (argument.Type.IsArray)
-                {
-                    ValidateArrayArgument(formula.Name, argument, argumentValue);
-                }
-                else
-                {
-                    ValidateNonArrayArgument(formula.Name, argument, argumentValue);
-                }
-            }
-        }
-
-        private void ValidateArgumentCount(int minArgs, int maxArgs, string formulaName, object[] arguments)
-        {
-            if (arguments.Length > maxArgs || arguments.Length < minArgs)
-            {
-                throw new EvaluationException($"Invalid number of arguments for '{formulaName}' formula. Expected Min = {minArgs}, Max = {maxArgs} arguments.");
-            }
-        }
-
-        private void ValidateArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
-        {
-            if (argumentValue.GetType() != argument.Type)
-            {
-                throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected array type.");
-            }
-        }
-
-        private void ValidateNonArrayArgument(string formulaName, FormulaArgument argument, object argumentValue)
-        {
-            if (argument is ObjectArgument)
-            {
-                if(!MatchesSupportedTypes(argumentValue.GetType()))
-                {
-                    throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected String/Double/Int32/Boolean type.");
-                }
-            }
-            else if (argument.Type != argumentValue.GetType())
-            {
-                throw new EvaluationException($"{GetTypeMismatchError(formulaName, argument)}. Expected {argument.Type.Name} type.");
-            }
-        }
-
-        private bool MatchesSupportedTypes(Type type)
-        {
-            return type == typeof(string) || type == typeof(double) || type == typeof(int) || type == typeof(bool);
-        }
-        #endregion
-
         #region Argument resolving
         private bool ResolveCondition(Condition condition)
         {
@@ -167,7 +88,7 @@ namespace AlphaX.FormulaEngine
         {
             if (_engine.Context == null)
             {
-                throw new EvaluationException("No context found to resolve custom name.");
+                throw new EvaluationException($"No context found to resolve custom name ({customName.Value}).");
             }
 
             var resolvedValue = _engine.Context.Resolve(customName.Value);
@@ -204,66 +125,71 @@ namespace AlphaX.FormulaEngine
         }
         #endregion
 
-        private string GetTypeMismatchError(string formulaName, FormulaArgument argument)
-        {
-            return $"Formula : '{formulaName}' - Argument ({argument.Name}) type does't match";
-        }
-
-        public static bool Compare(object left, string @operator, object right)
+        public bool Compare(object left, string @operator, object right)
         {
             try
             {
-                if (@operator == Tokens.EqualsTo)
-                    return Comparer.Equals(left, right);
+                if (@operator == _engine.Operator.EqualsTo)
+                    return Equals(left, right);
 
-                if (@operator == Tokens.NotEquals)
-                    return !Comparer.Equals(left, right);
+                if (@operator == _engine.Operator.NotEquals)
+                    return !Equals(left, right);
 
-                if (left is bool bool1 && right is bool bool2)
+                if(@operator == _engine.Operator.AND)
                 {
-                    switch (@operator)
-                    {
-                        case Tokens.AND:
-                            return bool1 && bool2;
+                    return (bool)left && (bool)right;
+                }
 
-                        case Tokens.OR:
-                            return bool1 || bool2;
+                if (@operator == _engine.Operator.OR)
+                {
+                    return (bool)left || (bool)right;
+                }
+
+                if (@operator == _engine.Operator.LessThan)
+                {
+                    if (left is double num1 && right is double num2)
+                    {
+                        return num1 < num2;
+                    }
+                    else if(left is DateTime date1 && right is DateTime date2)
+                    {
+                        return date1 < date2;
                     }
                 }
 
-                if (left is double num1 && right is double num2)
+                if (@operator == _engine.Operator.LessThanEqualsTo)
                 {
-                    switch (@operator)
+                    if (left is double num1 && right is double num2)
                     {
-                        case Tokens.LessThan:
-                            return num1 < num2;
-
-                        case Tokens.GreaterThan:
-                            return num1 > num2;
-
-                        case Tokens.LessThanEqualsTo:
-                            return num1 <= num2;
-
-                        case Tokens.GreaterThanEqualsTo:
-                            return num1 >= num2;
+                        return num1 <= num2;
+                    }
+                    else if (left is DateTime date1 && right is DateTime date2)
+                    {
+                        return date1 <= date2;
                     }
                 }
 
-                if (left is DateTime date1 && right is DateTime date2)
+                if (@operator == _engine.Operator.GreaterThan)
                 {
-                    switch (@operator)
+                    if (left is double num1 && right is double num2)
                     {
-                        case Tokens.LessThan:
-                            return date1 < date2;
+                        return num1 > num2;
+                    }
+                    else if (left is DateTime date1 && right is DateTime date2)
+                    {
+                        return date1 > date2;
+                    }
+                }
 
-                        case Tokens.GreaterThan:
-                            return date1 > date2;
-
-                        case Tokens.LessThanEqualsTo:
-                            return date1 <= date2;
-
-                        case Tokens.GreaterThanEqualsTo:
-                            return date1 >= date2;
+                if (@operator == _engine.Operator.GreaterThanEqualsTo)
+                {
+                    if (left is double num1 && right is double num2)
+                    {
+                        return num1 >= num2;
+                    }
+                    else if (left is DateTime date1 && right is DateTime date2)
+                    {
+                        return date1 >= date2;
                     }
                 }
 

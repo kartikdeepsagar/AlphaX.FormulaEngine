@@ -17,8 +17,14 @@
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new ArrayArgument("values", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Returns sum of provided values"
+            };
+            info.AddArgument(new ArrayArgument("values", true)
+            {
+                Description = "Array of numeric values"
+            });
             return info;
         }
     }

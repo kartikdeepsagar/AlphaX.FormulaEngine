@@ -13,9 +13,21 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new StringArgument("seperator", true));
-            info.AddArgument(new StringArgument("value", true));
+           FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Splits the input string into an array using the provided delimiter."
+            };
+
+            info.AddArgument(new StringArgument("separator", true)
+            {
+                Description = "The delimiter to use for string split."
+            });
+
+            info.AddArgument(new StringArgument("value", true)
+            {
+                Description = "The input string."
+            });
+
             return info;
         }
     }

@@ -8,5 +8,19 @@
         {
             return value?.ToLowerInvariant();
         }
+
+        protected override FormulaInfo GetFormulaInfo()
+        {
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Returns the lowercase string."
+            };
+            info.AddArgument(new StringArgument("value", true)
+            {
+                Description = "The value to convert."
+            });
+
+            return info;
+        }
     }
 }

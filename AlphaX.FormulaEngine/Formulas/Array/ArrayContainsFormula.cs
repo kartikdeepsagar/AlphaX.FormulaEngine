@@ -18,9 +18,18 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new ArrayArgument("source", true));
-            info.AddArgument(new ObjectArgument("value2", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Checks if array contains a value."
+            };
+            info.AddArgument(new ArrayArgument("source", true)
+            {
+                Description = "Source array to search in."
+            });
+            info.AddArgument(new ObjectArgument("value", true)
+            {
+                Description = "Value to search for."
+            });
             return info;
         }
     }

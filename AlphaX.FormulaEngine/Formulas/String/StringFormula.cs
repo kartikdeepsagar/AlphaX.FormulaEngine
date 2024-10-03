@@ -12,12 +12,5 @@
         }
 
         protected abstract object EvaluateString(string value);
-
-        protected override FormulaInfo GetFormulaInfo()
-        {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new StringArgument("value", true));
-            return info;
-        }
     }
 }

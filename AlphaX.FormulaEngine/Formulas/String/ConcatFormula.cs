@@ -15,8 +15,14 @@ namespace AlphaX.FormulaEngine.Formulas
 
         protected override FormulaInfo GetFormulaInfo()
         {
-            FormulaInfo info = new FormulaInfo();
-            info.AddArgument(new ArrayArgument("values", true));
+            FormulaInfo info = new FormulaInfo(Name)
+            {
+                Description = "Concatenate all the values present in the provided array."
+            };
+            info.AddArgument(new ArrayArgument("values", true)
+            {
+                Description = "Array to concatenate."
+            });
             return info;
         }
     }
