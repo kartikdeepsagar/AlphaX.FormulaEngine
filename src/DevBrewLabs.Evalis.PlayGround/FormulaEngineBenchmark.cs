@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text;
 
-namespace DevBrewLabs.Evalis.Benchmark
+namespace DevBrewLabs.Evalis.PlayGround
 {
     public static class FormulaEngineBenchmark
     {
@@ -21,7 +18,7 @@ namespace DevBrewLabs.Evalis.Benchmark
             Console.WriteLine();
 
             Console.WriteLine("Cooking expressions...");
-            var expressions = CookExpressions(arguments);           
+            var expressions = CookExpressions(arguments);
             Console.WriteLine("Expressions cooked...");
 
             Console.WriteLine();
