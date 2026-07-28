@@ -19,6 +19,8 @@ namespace DevBrewLabs.Evalis.Core.Parsing
         private IParserResult _openBracketResult;
         private IParserResult _closeBracketResult;
 
+        public bool AllowTrace { get; set; }
+
         public ExpressionParser(IEngineSettings settings, LogicalOperator @operator)
         {
             _openBracketResult = new OpenBracketResult();
@@ -30,7 +32,7 @@ namespace DevBrewLabs.Evalis.Core.Parsing
         private void BuildParser(IEngineSettings settings, LogicalOperator @operator)
         {
             var emptyStringResult = new StringResult(string.Empty);
-            var whiteSpacesParser = Parser.WhiteSpace.Many().MapResult(x => emptyStringResult);
+            var whiteSpacesParser = Parser.WhiteSpace().Many().MapResult(x => emptyStringResult);
 
             _nullParser = Parser.String("null").MapResult(x => new StringResult(null));
 
@@ -50,7 +52,7 @@ namespace DevBrewLabs.Evalis.Core.Parsing
               .AndThen(whiteSpacesParser)
               .MapResult(x => new OperatorResult((string)x.Value[0].Value));
 
-            _varParser = new VarParser();
+            _varParser = Parser.Var(AllowTrace);
 
             _customNameParser = Parser.String(SyntaxTokens.Custom)
                 .AndThen(_varParser)
@@ -79,7 +81,7 @@ namespace DevBrewLabs.Evalis.Core.Parsing
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            _boolParser = Parser.Boolean
+            _boolParser = Parser.Boolean()
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
@@ -103,7 +105,7 @@ namespace DevBrewLabs.Evalis.Core.Parsing
                 .Or(openBracketParser.AndThen(Parser.Lazy(() => _argParser)).AndThen(closeBracketParser))
                 .MapError(x => new ParserError(x.Index, "Invalid formula argument"));
 
-            var peekParser = new PeekParser(SyntaxTokens.Comma);
+            var peekParser = Parser.Peek(SyntaxTokens.Comma);
 
             _argParser = baseArgParser
                 .Next(leftOperandResult =>

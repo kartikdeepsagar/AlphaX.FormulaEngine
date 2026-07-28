@@ -1,23 +1,33 @@
 using DevBrewLabs.Parserly;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace DevBrewLabs.Evalis.Tests
 {
-    internal class SpreadsheetTokenParser : RegexParser<StringResult>
+    internal class SpreadsheetTokenParser : Parser<StringResult>
     {
-        public SpreadsheetTokenParser(string pattern) : base(new System.Text.RegularExpressions.Regex(pattern, System.Text.RegularExpressions.RegexOptions.Compiled), true)
+        private Regex _regex;
+
+        public SpreadsheetTokenParser(string pattern)
         {
+            _regex = new Regex(pattern, RegexOptions.Compiled);
         }
 
-        protected override StringResult ConvertResult(System.Text.RegularExpressions.Match value)
+        protected override IParserState ParseInput(IParserState inputState)
         {
-            return new StringResult(value.Value);
-        }
+            var input = inputState.ActualInput.Substring(inputState.Index);
 
-        protected override IParserError CreateError(int index, string value)
-        {
-            return new ParserError(index, "Unexpected custom token");
+            Match match = _regex.Match(input);
+
+            if (match.Success)
+            {
+                return ParserStates.Result(inputState, new StringResult(match.Value), inputState.Index + match.Value.Length);
+            }
+            else
+            {
+                return ParserStates.Error(inputState, new ParserError(inputState.Index, "No match"));
+            }
         }
     }
 

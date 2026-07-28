@@ -41,7 +41,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DevBrewLabs.Parserly" Version="1.0.1" />
+    <PackageReference Include="DevBrewLabs.Parserly" Version="1.0.2" />
   </ItemGroup>
 
   <ItemGroup>
