@@ -5,28 +5,37 @@ Built on top of [DevBrewLabs.Parserly](https://www.nuget.org/packages/DevBrewLab
 
 🔗 [DevBrewLabs.Evalis GitHub Repo](https://github.com/kartikdeepsagar/DevBrewLabs.Evalis)
 
-> [!NOTE]
-> **📢 Rebranding Notice**
-> `AlphaX.FormulaEngine` has been officially rebranded to **`DevBrewLabs.Evalis`**.
-> - **Package Name:** `AlphaX.FormulaEngine` ➔ **`DevBrewLabs.Evalis`**
-> - **Core Engine Class:** `AlphaXFormulaEngine` ➔ **`FormulaEngine`**
-> - **Parser Dependency:** `AlphaX.Parserz` ➔ **`DevBrewLabs.Parserly`**
-> - **Namespace:** `AlphaX.FormulaEngine` ➔ **`DevBrewLabs.Evalis`**
+---
+
+## 🚀 What's New in v1.0.1
+- **🚀 ~3x Performance Boost & Engine Optimization:**
+  - **⚡ Up to 3x Faster Execution:** Major hot-path evaluation optimizations deliver up to a 3x times reduction in evaluation latency** and significantly lower GC memory pressure across complex expressions.
+  - **AST Postfix Caching (`ConditionalWeakTable`):** Zero-allocation caching of transformed postfix ASTs for previously parsed expressions, eliminating repeat tree transformation overhead during repeated evaluations.
+  - **Fast-Path Operator Priorities:** Removed dictionary lookups in favor of O(1) `switch` statements for resolving operator priorities.
+  - **Pre-Allocated Collection Capacities:** Internal stacks and lists in `InfixToPostfix` are now pre-sized based on expression length to eliminate dynamic array reallocations.
+  - **Unboxed Numeric Operations:** Optimized `AsDouble` type resolution for primitive numbers (`int`, `float`, `byte`, etc.) to eliminate unnecessary object boxing during arithmetic and logical comparisons.
 
 ---
 
-## 🚀 What's New in v3.4.0
-- **Structured Error Handling:** Evaluation errors now safely return an `Error` struct inside `IEvaluationResult` rather than throwing expensive C# exceptions.
-- **Variadic Arguments (`isVariadic`):** Formulas can now natively support infinite comma-separated arguments (e.g., `SUM`, `CONCAT`, `IFS`) by using the `isVariadic: true` parameter when defining a `FormulaArgument`.
-- **Centralized Argument Validation:** Formula argument counts are now securely and automatically validated by the engine prior to execution, removing boilerplate code from custom formulas.
+## ⚡ Performance Benchmarks
 
-> [!WARNING]
-> **Breaking Changes**
-> * **Exception Handling:** The engine no longer throws `EvaluationException` when a formula encounters an error (e.g., invalid arguments). Instead, it returns an `IEvaluationResult` with the new `Error` struct populated. Update your code to check `if (result.Error.HasValue)` instead of using a `try-catch` block.
-> * **Custom Formulas:** The `ValidateArgumentCount()` method has been removed from `Formula`. The engine now handles validation for you automatically before `Evaluate()` is ever called. If you have custom formulas, you must remove any calls to this base method.
+> 📊 **Benchmark Environment & Configuration:**  
+> - **Runtime:** .NET 10.0 (`DevBrewLabs.Evalis.PlayGround`)  
+> - **Iterations:** **500 iterations per test case**   
 
-
-
+| Test Case | Category | Total (ms) | Avg (ms/op) | Avg (µs/op) | Throughput |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| Large Integer SUM (10,000 args) | Aggregation | 560.2ms | 1.1204ms | 1,120.4µs | 893 ops/s |
+| Complex Nested Math & Rounding | Arithmetic | 2.3ms | 0.0046ms | 4.6µs | 219,722 ops/s |
+| Trig & Exponential Formulas | Arithmetic | 1.3ms | 0.0025ms | 2.5µs | 398,121 ops/s |
+| Nested String Transformations | String | 4.6ms | 0.0092ms | 9.2µs | 108,321 ops/s |
+| Multi-Condition IF Branching | Logical | 1.9ms | 0.0038ms | 3.8µs | 262,467 ops/s |
+| Multi-Branch IFS Matrix | Logical | 2.0ms | 0.0041ms | 4.1µs | 245,845 ops/s |
+| Array Membership Search | Array | 0.6ms | 0.0012ms | 1.2µs | 814,598 ops/s |
+| Deep Call Tree (15 Levels) | Recursion | 2.6ms | 0.0051ms | 5.1µs | 194,235 ops/s |
+| Real-World Business Rule | Business | 1.9ms | 0.0038ms | 3.8µs | 260,417 ops/s |
+| Error Handling & Coalesce | Logical | 8.4ms | 0.0168ms | 16.8µs | 59,645 ops/s |
+| **TOTAL / OVERALL METRICS** | **All** | **585.8ms** | **0.1172ms** | **117.2µs** | **8,535 ops/s** |
 
 ---
 

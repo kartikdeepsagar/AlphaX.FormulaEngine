@@ -1,22 +1,25 @@
-﻿namespace DevBrewLabs.Evalis.Benchmark
+using System;
+
+namespace DevBrewLabs.Evalis.Benchmark
 {
     public class Program
-    {  
+    {
         static void Main(string[] args)
         {
-            var engine = new FormulaEngine();
+            int iterations = 500;
+            int argumentCount = 10000;
 
-            //Console.WriteLine(string.Join(",\r\n", engine.FormulaStore.GetAll()));
-            //Console.WriteLine("---------------------------------");
+            if (args.Length > 0 && int.TryParse(args[0], out int customIter))
+            {
+                iterations = customIter;
+            }
 
-            //var expr = SequencedExpressionBuilder
-            //    .Create("Result1", "SUM(1,2,12)")
-            //    .Next("Result2", "AVERAGE(1,2,SUM(1, SUM(1,4)))")
-            //    .Next("Result3", "SUM(1,$Result1,$Result2)");
+            if (args.Length > 1 && int.TryParse(args[1], out int customArgs))
+            {
+                argumentCount = customArgs;
+            }
 
-            //var result = engine.Evaluate(expr);
-
-            FormulaEngineBenchmark.RunBenchmarks(engine, 1000);
+            EngineBenchmarkRunner.RunBenchmarks(iterations, argumentCount);
         }
-    } 
+    }
 }

@@ -19,6 +19,8 @@ namespace DevBrewLabs.Evalis.Core.Parsing
         private IParserResult _openBracketResult;
         private IParserResult _closeBracketResult;
 
+        public bool AllowTrace { get; set; }
+
         public ExpressionParser(IEngineSettings settings, LogicalOperator @operator)
         {
             _openBracketResult = new OpenBracketResult();
@@ -30,7 +32,7 @@ namespace DevBrewLabs.Evalis.Core.Parsing
         private void BuildParser(IEngineSettings settings, LogicalOperator @operator)
         {
             var emptyStringResult = new StringResult(string.Empty);
-            var whiteSpacesParser = Parser.WhiteSpace.Many().MapResult(x => emptyStringResult);
+            var whiteSpacesParser = Parser.WhiteSpace().Many().MapResult(x => emptyStringResult);
 
             _nullParser = Parser.String("null").MapResult(x => new StringResult(null));
 
@@ -50,7 +52,7 @@ namespace DevBrewLabs.Evalis.Core.Parsing
               .AndThen(whiteSpacesParser)
               .MapResult(x => new OperatorResult((string)x.Value[0].Value));
 
-            _varParser = new VarParser();
+            _varParser = Parser.Var(AllowTrace);
 
             _customNameParser = Parser.String(SyntaxTokens.Custom)
                 .AndThen(_varParser)
@@ -79,7 +81,7 @@ namespace DevBrewLabs.Evalis.Core.Parsing
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
-            _boolParser = Parser.Boolean
+            _boolParser = Parser.Boolean()
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
 
@@ -103,8 +105,13 @@ namespace DevBrewLabs.Evalis.Core.Parsing
                 .Or(openBracketParser.AndThen(Parser.Lazy(() => _argParser)).AndThen(closeBracketParser))
                 .MapError(x => new ParserError(x.Index, "Invalid formula argument"));
 
-            var peekParser = new PeekParser(SyntaxTokens.Comma);
+            var peekParser = Parser.Peek(SyntaxTokens.Comma);
 
+            // --- FIX: the array of accumulated (operand, operator, operand, ...) results
+            // is now built exactly once, after the Many() loop completes, instead of being
+            // rebuilt (ToArray + new ArrayResult) on every single iteration of the loop.
+            // For an expression with n chained operators this changes an O(n^2) allocation
+            // pattern with n-1 wasted ArrayResult objects into a single O(n) allocation.
             _argParser = baseArgParser
                 .Next(leftOperandResult =>
                 {
@@ -118,14 +125,25 @@ namespace DevBrewLabs.Evalis.Core.Parsing
                             {
                                 if (resultsList == null)
                                 {
-                                    resultsList = new List<IParserResult> { leftOperandResult, operatorResult, rightOperandResult };
+                                    // small initial capacity to cut down on List<T> resizes
+                                    resultsList = new List<IParserResult>(8)
+                                    {
+                                    leftOperandResult,
+                                    operatorResult,
+                                    rightOperandResult
+                                    };
                                 }
                                 else
                                 {
                                     resultsList.Add(operatorResult);
                                     resultsList.Add(rightOperandResult);
                                 }
-                                return (IParserResult)new ArrayResult(resultsList.ToArray());
+
+                                // Nothing downstream consumes this per-iteration value directly;
+                                // the real combined result is assembled once in the Many().MapResult
+                                // below. Returning rightOperandResult avoids allocating a throwaway
+                                // ArrayResult on every iteration.
+                                return rightOperandResult;
                             }).MapError(x => new ParserError(x.Index, "Invalid logical expression"));
                         })
                         .Many()
@@ -134,11 +152,12 @@ namespace DevBrewLabs.Evalis.Core.Parsing
                             if (x.Value.Length == 0)
                                 return leftOperandResult;
 
-                            return new ArrayResult(resultsList.ToArray());
+                            return (IParserResult)new ArrayResult(resultsList.ToArray());
                         })
                     );
                 })
                 .MapError(x => new ParserError(x.Index, "Invalid argument found in expression"));
+
             var formulaNameParser = _varParser
                 .AndThen(whiteSpacesParser)
                 .MapResult(x => x.Value[0]);
@@ -168,7 +187,9 @@ namespace DevBrewLabs.Evalis.Core.Parsing
                 parser = parser == null ? GetParser(type) : parser.Or(GetParser(type));
             }
 
-            return parser.Or(_nullParser);
+            // FIX: guard against parseOrder being empty (or fully skipped), which
+            // previously threw a NullReferenceException on parser.Or(_nullParser).
+            return parser == null ? _nullParser : parser.Or(_nullParser);
         }
 
         private IParser GetParser(ParseType mode)

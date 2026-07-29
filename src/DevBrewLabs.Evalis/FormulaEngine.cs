@@ -3,9 +3,11 @@ using DevBrewLabs.Evalis.Formulas;
 using DevBrewLabs.Parserly;
 using DevBrewLabs.Parserly.Tracing;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DevBrewLabs.Evalis
@@ -17,6 +19,7 @@ namespace DevBrewLabs.Evalis
     {
         private IParser _expressionParser;
         private readonly object _settingsLock = new object();
+        private readonly LruCache<string, IParserState> _resultCache = new LruCache<string, IParserState>(1000);
 
         #region Internal
         internal Evaluator Evaluator {  get; private set; }
@@ -127,7 +130,7 @@ namespace DevBrewLabs.Evalis
                     return EvaluationResult.WithError(Error.General("Input can't be null"));
                 }
 
-                var parserState = _expressionParser.Run(input);
+                var parserState = Parse(input);
 
                 if (parserState.IsError)
                     return EvaluationResult.WithError(Error.Syntax(parserState.Error.Message));
@@ -144,14 +147,19 @@ namespace DevBrewLabs.Evalis
             }
         }
 
+
         public IParserState Parse(string input)
         {
             if (input == null)
-            {
                 throw new ArgumentNullException(nameof(input));
+
+            if (!CurrentSettings.EnableCaching)
+            {
+                _resultCache.Clear();
+                return _expressionParser.Run(input);
             }
 
-            return _expressionParser.Run(input);
+            return _resultCache.GetOrAdd(input, key => _expressionParser.Run(key));
         }
 
         public string[] ExtractVariables(string input)
@@ -324,5 +332,80 @@ namespace DevBrewLabs.Evalis
                 }
             }
         }
+
+
+        #region caching
+        private sealed class LruCache<TKey, TValue>
+        {
+            private readonly int _capacity;
+            private readonly ConcurrentDictionary<TKey, LinkedListNode<(TKey Key, Lazy<TValue> Value)>> _map;
+            private readonly LinkedList<(TKey Key, Lazy<TValue> Value)> _order;
+            private readonly object _orderLock = new object();
+
+            public LruCache(int capacity)
+            {
+                if (capacity <= 0)
+                    throw new ArgumentOutOfRangeException(nameof(capacity));
+
+                _capacity = capacity;
+                _map = new ConcurrentDictionary<TKey, LinkedListNode<(TKey, Lazy<TValue>)>>();
+                _order = new LinkedList<(TKey, Lazy<TValue>)>();
+            }
+
+            public TValue GetOrAdd(TKey key, Func<TKey, TValue> factory)
+            {
+                if (_map.TryGetValue(key, out var existingNode))
+                {
+                    Touch(existingNode);
+                    return existingNode.Value.Value.Value; // Lazy<T> blocks concurrent callers on the same key until computed once
+                }
+
+                var lazy = new Lazy<TValue>(() => factory(key), LazyThreadSafetyMode.ExecutionAndPublication);
+                var node = new LinkedListNode<(TKey, Lazy<TValue>)>((key, lazy));
+
+                var added = _map.GetOrAdd(key, node);
+                if (ReferenceEquals(added, node))
+                {
+                    lock (_orderLock)
+                    {
+                        _order.AddFirst(node);
+                        TrimIfNeeded();
+                    }
+                }
+                else
+                {
+                    Touch(added); // someone beat us to inserting; use theirs
+                }
+
+                return added.Value.Value.Value; // forces evaluation, shared across all waiters
+            }
+
+            public void Clear()
+            {
+                _map?.Clear();
+                _order?.Clear();
+            }
+
+            private void Touch(LinkedListNode<(TKey Key, Lazy<TValue> Value)> node)
+            {
+                lock (_orderLock)
+                {
+                    if (node.List != null) _order.Remove(node);
+                    _order.AddFirst(node);
+                }
+            }
+
+            private void TrimIfNeeded()
+            {
+                while (_map.Count > _capacity)
+                {
+                    var lru = _order.Last;
+                    if (lru == null) break;
+                    _order.RemoveLast();
+                    _map.TryRemove(lru.Value.Key, out _);
+                }
+            }
+        }
+        #endregion
     }
 }

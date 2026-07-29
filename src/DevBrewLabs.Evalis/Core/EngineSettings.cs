@@ -14,6 +14,7 @@ namespace DevBrewLabs.Evalis
         public IParseOrder EngineParseOrder { get; set; }
         public LogicalOperatorMode LogicalOperatorMode { get; set; }
         public List<IParser> CustomTokenParsers { get; set; }
+        public bool EnableCaching { get; set; }
 
         /// <summary>
         /// Initializes EngineSettings with default values.
@@ -23,6 +24,7 @@ namespace DevBrewLabs.Evalis
             LogicalOperatorMode = LogicalOperatorMode.Default;
             DoubleQuotedStrings = true;
             EngineParseOrder = ParseOrderBuilder.DefaultParseOrder;
+            EnableCaching = true;
         }
     }
 }
