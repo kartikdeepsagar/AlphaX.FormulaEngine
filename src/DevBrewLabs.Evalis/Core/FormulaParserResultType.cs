@@ -56,9 +56,9 @@ namespace DevBrewLabs.Evalis
 
     internal class OperatorResult : ParserResult<string>
     {
-        public List<IParserResult> Child { get; set; }
+        public List<IParserResult> Children { get; }
         public OperatorResult(string value) : base(value, FormulaParserResultType.Operator) {
-            Child = new List<IParserResult>();
+            Children = new List<IParserResult>();
         }
     }
 }

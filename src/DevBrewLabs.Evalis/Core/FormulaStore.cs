@@ -26,6 +26,11 @@ namespace DevBrewLabs.Evalis
             return _formulas[formulaName];
         }
 
+        public bool TryGet(string formulaName, out FormulaBase formula)
+        {
+            return _formulas.TryGetValue(formulaName, out formula);
+        }
+
         public bool Contains(string formulaName)
         {
             return _formulas.ContainsKey(formulaName);

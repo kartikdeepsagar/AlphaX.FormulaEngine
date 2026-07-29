@@ -5,24 +5,29 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace DevBrewLabs.Evalis
 {
     internal class Evaluator : IEvaluator
     {
         private IFormulaStore _formulaStore;
-        private static Dictionary<string, int> _operatorPriority;
+        private static readonly ConditionalWeakTable<ArrayResult, IParserResult> _postfixCache = new ConditionalWeakTable<ArrayResult, IParserResult>();
 
-        static Evaluator()
+        internal static bool TryGetOperatorPriority(string op, out int priority)
         {
-            _operatorPriority = new Dictionary<string, int>()
+            switch (op)
             {
-                { ArithmeticOperator.Add, 2 },
-                { ArithmeticOperator.Subtract, 2 },
-                { ArithmeticOperator.Multiply, 3 },
-                { ArithmeticOperator.Divide, 3 },
-                { ArithmeticOperator.Modulo, 3 },
-            };
+                case ArithmeticOperator.Add:
+                case ArithmeticOperator.Subtract:
+                    priority = 2; return true;
+                case ArithmeticOperator.Multiply:
+                case ArithmeticOperator.Divide:
+                case ArithmeticOperator.Modulo:
+                    priority = 3; return true;
+                default:
+                    priority = 0; return false;
+            }
         }
 
         internal LogicalOperator SupportedLogicalOperators { get; set; }
@@ -32,75 +37,87 @@ namespace DevBrewLabs.Evalis
             _formulaStore = formulaStore;
         }
 
-        public async Task<object> Evaluate(IParserResult result, IEngineContext context)
+        public Task<object> Evaluate(IParserResult result, IEngineContext context)
         {
             if (result is ArrayResult arrResult)
             {
-                result = InfixToPostfix(arrResult.Normalize());
+                if (!_postfixCache.TryGetValue(arrResult, out var cachedPostfix))
+                {
+                    cachedPostfix = InfixToPostfix(arrResult.Normalize());
+                    _postfixCache.Add(arrResult, cachedPostfix);
+                }
+                result = cachedPostfix;
             }
 
             if(result is ErrorResult errorResult)
             {
-                return EvaluationResult.WithError(Error.Syntax(errorResult.Message));
+                return Task.FromResult<object>(EvaluationResult.WithError(Error.Syntax(errorResult.Message)));
             }
 
             if (result is ArrayResult)
             {
-                return await Evaluate(result, context);
+                return Evaluate(result, context);
             }
 
             if (result is FormulaResult formulaResult)
             {
-                return await EvaluateFormula(formulaResult, context);
+                return EvaluateFormula(formulaResult, context);
             }
 
             if (result is CustomNameResult customNameResult)
             {
-                return await Resolve(customNameResult.Value, context);
+                return Resolve(customNameResult.Value, context);
             }
 
             if (result is OperatorResult opResult)
             {
-                return await EvaluateOperator(opResult, context);
+                return EvaluateOperator(opResult, context);
             }
 
             if(result == null)
             {
-                return EvaluationResult.WithError(Error.Syntax("Expression is invalid."));
+                return Task.FromResult<object>(EvaluationResult.WithError(Error.Syntax("Expression is invalid.")));
             }
 
-            return result.Value;
+            return Task.FromResult<object>(result.Value);
         }
 
         private async Task<object> EvaluateFormula(FormulaResult result, IEngineContext context)
         {
             var formulaName = result.Value.Name;
 
-            if (!_formulaStore.Contains(formulaName))
+            if (!(_formulaStore as FormulaStore).TryGet(formulaName, out var formula))
             {
                 return EvaluationResult.WithError(Error.Name($"Invalid formula '{formulaName}'"));
             }
-
-            FormulaBase formula = (_formulaStore as FormulaStore).Get(formulaName);
 
             var args = result.Value.Args;
 
             if (args.Length > formula.Info.MaxArgsCount || args.Length < formula.Info.MinArgsCount)
             {
                 return EvaluationResult.WithError(Error.Value(string.Format(
-                    DevBrewLabs.Evalis.Resources.FormulaResources.InvalidArgumentCount,
+                    FormulaResources.InvalidArgumentCount,
                     formula.Info.MinArgsCount,
                     formula.Info.MaxArgsCount)));
             }
 
             var tasks = new Task<object>[args.Length];
+            bool allCompleted = true;
 
             for (int i = 0; i < args.Length; i++)
             {
-                tasks[i] = Evaluate(args[i], context);
+                var task = Evaluate(args[i], context);
+                tasks[i] = task;
+                if (!task.IsCompleted)
+                {
+                    allCompleted = false;
+                }
             }
 
-            await Task.WhenAll(tasks);
+            if (!allCompleted)
+            {
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
             
             // Materialize results directly
             var arguments = new object[args.Length];
@@ -149,10 +166,13 @@ namespace DevBrewLabs.Evalis
 
         private async Task<object> EvaluateOperator(OperatorResult result, IEngineContext context)
         {
-            var left = Evaluate(result.Child[0], context);
-            var right = Evaluate(result.Child[1], context);
+            var left = Evaluate(result.Children[0], context);
+            var right = Evaluate(result.Children[1], context);
 
-            await Task.WhenAll(left, right);
+            if (!left.IsCompleted || !right.IsCompleted)
+            {
+                await Task.WhenAll(left, right).ConfigureAwait(false);
+            }
             var leftVal = left.Result;
             if (leftVal is IEvaluationResult leftRes)
             {
@@ -173,39 +193,49 @@ namespace DevBrewLabs.Evalis
             {
                 case ArithmeticOperator.Add:
                     {
-                        if (leftVal is double leftOp && rightVal is double rightOp)
-                            return EvaluationResult.WithValue(leftOp + rightOp);
+                        var leftOp = EvalisUtil.AsDouble(leftVal);
+                        var rightOp = EvalisUtil.AsDouble(rightVal);
+                        if (leftOp.HasValue && rightOp.HasValue)
+                            return EvaluationResult.WithValue(leftOp.Value + rightOp.Value);
                     }
                     return EvaluationResult.WithError(Error.Value($"Invalid operator used with operands. '{leftVal} {@operator} {rightVal}'."));
 
                 case ArithmeticOperator.Subtract:
                     {
-                        if (leftVal is double leftOp && rightVal is double rightOp)
-                            return EvaluationResult.WithValue(leftOp - rightOp);
+                        var leftOp = EvalisUtil.AsDouble(leftVal);
+                        var rightOp = EvalisUtil.AsDouble(rightVal);
+                        if (leftOp.HasValue && rightOp.HasValue)
+                            return EvaluationResult.WithValue(leftOp.Value - rightOp.Value);
                     }
                     return EvaluationResult.WithError(Error.Value($"Invalid operator used with operands. '{leftVal} {@operator} {rightVal}'."));
 
                 case ArithmeticOperator.Divide:
                     {
-                        if (leftVal is double leftOp && rightVal is double rightOp)
+                        var leftOp = EvalisUtil.AsDouble(leftVal);
+                        var rightOp = EvalisUtil.AsDouble(rightVal);
+                        if (leftOp.HasValue && rightOp.HasValue)
                         {
-                            if (rightOp == 0) return EvaluationResult.WithError(Error.DivideByZero);
-                            return EvaluationResult.WithValue(leftOp / rightOp);
+                            if (rightOp.Value == 0) return EvaluationResult.WithError(Error.DivideByZero);
+                            return EvaluationResult.WithValue(leftOp.Value / rightOp.Value);
                         }
                     }
                     return EvaluationResult.WithError(Error.Value($"Invalid operator used with operands. '{leftVal} {@operator} {rightVal}'."));
 
                 case ArithmeticOperator.Multiply:
                     {
-                        if (leftVal is double leftOp && rightVal is double rightOp)
-                            return EvaluationResult.WithValue(leftOp * rightOp);
+                        var leftOp = EvalisUtil.AsDouble(leftVal);
+                        var rightOp = EvalisUtil.AsDouble(rightVal);
+                        if (leftOp.HasValue && rightOp.HasValue)
+                            return EvaluationResult.WithValue(leftOp.Value * rightOp.Value);
                     }
                     return EvaluationResult.WithError(Error.Value($"Invalid operator used with operands. '{leftVal} {@operator} {rightVal}'."));
 
                 case ArithmeticOperator.Modulo:
                     {
-                        if (leftVal is double leftOp && rightVal is double rightOp)
-                            return EvaluationResult.WithValue(leftOp % rightOp);
+                        var leftOp = EvalisUtil.AsDouble(leftVal);
+                        var rightOp = EvalisUtil.AsDouble(rightVal);
+                        if (leftOp.HasValue && rightOp.HasValue)
+                            return EvaluationResult.WithValue(leftOp.Value % rightOp.Value);
                     }
                     return EvaluationResult.WithError(Error.Value($"Invalid operator used with operands. '{leftVal} {@operator} {rightVal}'."));
 
@@ -223,17 +253,18 @@ namespace DevBrewLabs.Evalis
             }
         }
 
-        private IParserResult InfixToPostfix(ArrayResult infixResult)
+        internal static IParserResult InfixToPostfix(ArrayResult infixResult)
         {
             var openBracketResult = new OpenBracketResult();
             var closeBracketResult = new CloseBracketResult();
 
             int openBrackets = 0;
             int closedBrackets = 0;
-            var reverse = new IParserResult[infixResult.Value.Length];
-            for (int i = 0; i < infixResult.Value.Length; i++)
+            int length = infixResult.Value.Length;
+            var reverse = new IParserResult[length];
+            for (int i = 0; i < length; i++)
             {
-                var x = infixResult.Value[infixResult.Value.Length - 1 - i];
+                var x = infixResult.Value[length - 1 - i];
                 if (x is OpenBracketResult)
                 {
                     openBrackets++;
@@ -255,8 +286,8 @@ namespace DevBrewLabs.Evalis
                 return new ErrorResult("Mismatched brackets in expression.");
             }
 
-            var operatorStack = new Stack<IParserResult>();
-            var outputList = new List<IParserResult>();
+            var operatorStack = new Stack<IParserResult>(length);
+            var outputList = new List<IParserResult>(length);
 
             foreach (var cur in reverse)
             {
@@ -276,6 +307,7 @@ namespace DevBrewLabs.Evalis
                 }
                 else if (cur is OperatorResult opResult)
                 {
+                    opResult.Children.Clear();
                     int c = operatorStack.Count;
                     // stack is empty, push operator
                     if (c == 0)
@@ -285,9 +317,13 @@ namespace DevBrewLabs.Evalis
                     else
                     {
                         var lastOperator = operatorStack.Peek();
+                        int opPriority;
+                        bool hasPriority = TryGetOperatorPriority(opResult.Value, out opPriority);
+                        int lastOpPriority = 0;
+                        if (lastOperator is OperatorResult lastOpTemp)
+                            TryGetOperatorPriority(lastOpTemp.Value, out lastOpPriority);
 
-                        if (lastOperator is OpenBracketResult || !_operatorPriority.ContainsKey(opResult.Value)
-                            || _operatorPriority[opResult.Value] > _operatorPriority[((OperatorResult)lastOperator).Value])
+                        if (lastOperator is OpenBracketResult || !hasPriority || opPriority > lastOpPriority)
                         {
                             operatorStack.Push(cur);
                         }
@@ -295,7 +331,8 @@ namespace DevBrewLabs.Evalis
                         {
                             while (lastOperator != null &&
                                 lastOperator is OperatorResult lastOpResult &&
-                                _operatorPriority[lastOpResult.Value] > _operatorPriority[opResult.Value])
+                                TryGetOperatorPriority(lastOpResult.Value, out lastOpPriority) &&
+                                lastOpPriority > opPriority)
                             {
                                 outputList.Add(lastOperator);
                                 operatorStack.Pop();
@@ -320,7 +357,7 @@ namespace DevBrewLabs.Evalis
             outputList.Reverse();
 
 
-            var pendingNodes = new Stack<IParserResult>();
+            var pendingNodes = new Stack<IParserResult>(length);
             IParserResult root = null;
 
             for (var i = 0; i < outputList.Count; i++)
@@ -333,8 +370,8 @@ namespace DevBrewLabs.Evalis
                 if (pendingNodes.Count > 0)
                 {
                     var lastPending = pendingNodes.Peek() as OperatorResult;
-                    lastPending.Child.Add(outputList[i]);
-                    if (lastPending.Child != null && lastPending.Child.Count == 2)
+                    lastPending.Children.Add(outputList[i]);
+                    if (lastPending.Children != null && lastPending.Children.Count == 2)
                     {
                         pendingNodes.Pop();
                     }
@@ -372,11 +409,6 @@ namespace DevBrewLabs.Evalis
 
         private static object NormalizeValue(object value)
         {
-            if (value is int || value is byte)
-            {
-                return Convert.ToDouble(value);
-            }
-
             if (value is Array array)
             {
                 var normalized = new object[array.Length];

@@ -1,11 +1,25 @@
-﻿namespace DevBrewLabs.Evalis.PlayGround
+using System;
+
+namespace DevBrewLabs.Evalis.Benchmark
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {
-            FormulaEngine engine = new FormulaEngine();
-            FormulaEngineBenchmark.RunBenchmarks(engine, 1000);
+            int iterations = 500;
+            int argumentCount = 10000;
+
+            if (args.Length > 0 && int.TryParse(args[0], out int customIter))
+            {
+                iterations = customIter;
+            }
+
+            if (args.Length > 1 && int.TryParse(args[1], out int customArgs))
+            {
+                argumentCount = customArgs;
+            }
+
+            EngineBenchmarkRunner.RunBenchmarks(iterations, argumentCount);
         }
     }
 }

@@ -1,10 +1,21 @@
-﻿using DevBrewLabs.Parserly;
+using DevBrewLabs.Parserly;
 using System;
 
 namespace DevBrewLabs.Evalis
 {
     internal static class EvalisUtil
     {
+        public static double? AsDouble(object val)
+        {
+            if (val is double d) return d;
+            if (val is int i) return (double)i;
+            if (val is byte b) return (double)b;
+            if (val is float f) return (double)f;
+            if (val is long l) return (double)l;
+            if (val is short s) return (double)s;
+            if (val is uint ui) return (double)ui;
+            return null;
+        }
         public static bool? Compare(object left, string @operator, object right, LogicalOperator supportedOperators)
         {
             try
@@ -27,9 +38,11 @@ namespace DevBrewLabs.Evalis
 
                 if (@operator == supportedOperators.LessThan)
                 {
-                    if (left is double num1 && right is double num2)
+                    double? num1 = AsDouble(left);
+                    double? num2 = AsDouble(right);
+                    if (num1.HasValue && num2.HasValue)
                     {
-                        return num1 < num2;
+                        return num1.Value < num2.Value;
                     }
                     else if (left is DateTime date1 && right is DateTime date2)
                     {
@@ -39,9 +52,11 @@ namespace DevBrewLabs.Evalis
 
                 if (@operator == supportedOperators.LessThanEqualsTo)
                 {
-                    if (left is double num1 && right is double num2)
+                    double? num1 = AsDouble(left);
+                    double? num2 = AsDouble(right);
+                    if (num1.HasValue && num2.HasValue)
                     {
-                        return num1 <= num2;
+                        return num1.Value <= num2.Value;
                     }
                     else if (left is DateTime date1 && right is DateTime date2)
                     {
@@ -51,9 +66,11 @@ namespace DevBrewLabs.Evalis
 
                 if (@operator == supportedOperators.GreaterThan)
                 {
-                    if (left is double num1 && right is double num2)
+                    double? num1 = AsDouble(left);
+                    double? num2 = AsDouble(right);
+                    if (num1.HasValue && num2.HasValue)
                     {
-                        return num1 > num2;
+                        return num1.Value > num2.Value;
                     }
                     else if (left is DateTime date1 && right is DateTime date2)
                     {
@@ -63,9 +80,11 @@ namespace DevBrewLabs.Evalis
 
                 if (@operator == supportedOperators.GreaterThanEqualsTo)
                 {
-                    if (left is double num1 && right is double num2)
+                    double? num1 = AsDouble(left);
+                    double? num2 = AsDouble(right);
+                    if (num1.HasValue && num2.HasValue)
                     {
-                        return num1 >= num2;
+                        return num1.Value >= num2.Value;
                     }
                     else if (left is DateTime date1 && right is DateTime date2)
                     {

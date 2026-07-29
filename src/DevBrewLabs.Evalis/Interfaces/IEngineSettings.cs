@@ -6,6 +6,10 @@ namespace DevBrewLabs.Evalis
     public interface IEngineSettings
     {
         /// <summary>
+        /// Enables caching.
+        /// </summary>
+        bool EnableCaching { get; set; }
+        /// <summary>
         /// Gets or sets whether the engine supports single/double quote for string inputs. (Default is true).
         /// </summary>
         bool DoubleQuotedStrings { get; set; }
